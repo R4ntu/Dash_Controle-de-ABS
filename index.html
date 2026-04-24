@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ABS Ofensores | Shopee Logistics</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --orange:#EE4D2D; --orange2:#FF6E4E; --orange-dim:rgba(238,77,45,0.12);
+  --bg:#0F0F0F; --card:#1A1A1A; --card2:#222; --border:#2A2A2A;
+  --text:#F2F2F2; --muted:#888; --muted2:#555;
+  --red:#FF4B4B; --red-dim:rgba(255,75,75,0.12);
+  --green:#16A34A; --green-dim:rgba(22,163,74,0.12);
+  --amber:#F59E0B; --amber-dim:rgba(245,158,11,0.12);
+  --blue:#3B82F6; --blue-dim:rgba(59,130,246,0.12);
+  --purple:#8B5CF6; --purple-dim:rgba(139,92,246,0.12);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;}
+.header{background:var(--card);border-bottom:1px solid var(--border);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.logo{display:flex;align-items:center;gap:12px;}
+.logo-icon{width:36px;height:36px;background:var(--orange);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff;letter-spacing:-1px;}
+.logo-text{font-size:18px;font-weight:600;color:var(--text);}
+.logo-sub{font-size:12px;color:var(--muted);font-weight:400;}
+.badge-live{background:var(--orange-dim);color:var(--orange);border:1px solid var(--orange);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;letter-spacing:0.5px;}
+.wrap{padding:24px 28px;max-width:1400px;margin:0 auto;}
+.filters{display:flex;gap:12px;margin-bottom:24px;align-items:center;flex-wrap:wrap;}
+.filter-group{display:flex;align-items:center;gap:8px;}
+.filter-label{font-size:12px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:0.5px;}
+select{background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-family:'Outfit',sans-serif;font-size:13px;cursor:pointer;outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px;}
+select:hover{border-color:#444;}
+.btn-reset{background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-family:'Outfit',sans-serif;font-size:13px;cursor:pointer;}
+.btn-reset:hover{border-color:#555;color:var(--text);}
+.filter-separator{width:1px;height:30px;background:var(--border);}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:24px;}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;position:relative;overflow:hidden;}
+.kpi::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;border-radius:3px 0 0 3px;}
+.kpi.orange::before{background:var(--orange);}
+.kpi.red::before{background:var(--red);}
+.kpi.amber::before{background:var(--amber);}
+.kpi.green::before{background:var(--green);}
+.kpi.purple::before{background:var(--purple);}
+.kpi-label{font-size:11px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;}
+.kpi-value{font-size:30px;font-weight:700;line-height:1;margin-bottom:4px;}
+.kpi.orange .kpi-value{color:var(--orange);}
+.kpi.red .kpi-value{color:var(--red);}
+.kpi.amber .kpi-value{color:var(--amber);}
+.kpi.green .kpi-value{color:var(--green);}
+.kpi.purple .kpi-value{color:var(--purple);}
+.kpi-sub{font-size:11px;color:var(--muted);}
+.charts-row{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:14px;margin-bottom:24px;}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;}
+.chart-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;}
+.chart-sub{font-size:11px;color:var(--muted);margin-bottom:16px;}
+.chart-wrap{position:relative;width:100%;height:200px;}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.section-title{font-size:15px;font-weight:600;}
+.section-sub{font-size:12px;color:var(--muted);}
+.search-box{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--text);outline:none;width:220px;}
+.search-box::placeholder{color:var(--muted2);}
+.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:24px;}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:#222;border-bottom:1px solid var(--border);}
+thead th{padding:11px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;cursor:pointer;white-space:nowrap;user-select:none;}
+thead th:hover{color:var(--text);}
+thead th.sort-asc::after{content:' ↑';color:var(--orange);}
+thead th.sort-desc::after{content:' ↓';color:var(--orange);}
+tbody tr{border-bottom:1px solid var(--border);transition:background 0.15s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:rgba(255,255,255,0.03);}
+tbody td{padding:11px 14px;font-size:13px;vertical-align:middle;}
+.name-cell{font-weight:500;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.coord-cell{font-size:12px;color:var(--muted);max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.week-badge{display:inline-block;background:var(--card2);border:1px solid var(--border);border-radius:4px;padding:2px 7px;font-size:11px;font-weight:600;margin-right:3px;}
+.week-badge.w14{border-color:#EE4D2D44;color:#EE4D2D;}
+.week-badge.w15{border-color:#F59E0B44;color:#F59E0B;}
+.week-badge.w16{border-color:#3B82F644;color:#3B82F6;}
+.dias-bar{display:flex;align-items:center;gap:8px;}
+.dias-num{font-size:18px;font-weight:700;min-width:28px;text-align:right;}
+.bar-track{flex:1;height:5px;background:var(--border);border-radius:3px;max-width:80px;}
+.bar-fill{height:100%;border-radius:3px;background:var(--orange);}
+.bar-fill.high{background:var(--red);}
+.status-pill{display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:3px 9px;font-size:11px;font-weight:500;}
+.pill-abandon{background:var(--red-dim);color:var(--red);border:1px solid rgba(255,75,75,0.25);}
+.pill-desligado{background:rgba(255,75,75,0.08);color:#FF7070;border:1px solid rgba(255,112,112,0.2);}
+.pill-ok{background:var(--green-dim);color:var(--green);border:1px solid rgba(22,163,74,0.25);}
+.pill-pending{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,158,11,0.25);}
+.pill-none{background:var(--card2);color:var(--muted);border:1px solid var(--border);}
+.entrevista-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px;}
+.dot-ok{background:var(--green);}
+.dot-no{background:var(--red);}
+.cid-tag{background:var(--blue-dim);color:var(--blue);border-radius:4px;padding:2px 7px;font-size:11px;font-weight:500;}
+.no-data{text-align:center;padding:48px;color:var(--muted);}
+.coord-legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;}
+.coord-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);}
+.coord-dot{width:8px;height:8px;border-radius:50%;}
+.abandon-alert{background:linear-gradient(90deg,rgba(255,75,75,0.08),transparent);border:1px solid rgba(255,75,75,0.2);border-radius:10px;padding:14px 18px;margin-bottom:24px;display:flex;align-items:center;gap:12px;}
+.alert-icon{font-size:18px;color:var(--red);}
+.alert-text{font-size:13px;color:var(--text);}
+.alert-text strong{color:var(--red);}
+.pagination{display:flex;align-items:center;gap:8px;justify-content:flex-end;padding:12px 14px;border-top:1px solid var(--border);}
+.page-btn{background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px 12px;font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;}
+.page-btn:hover{border-color:#555;}
+.page-btn.active{background:var(--orange);border-color:var(--orange);color:#fff;}
+.page-info{font-size:12px;color:var(--muted);}
+.sort-controls{display:flex;gap:8px;align-items:center;}
+.sort-btn{background:var(--card2);border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:5px 12px;font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;}
+.sort-btn.active{background:var(--orange-dim);border-color:var(--orange);color:var(--orange);}
+.btn-import{display:inline-flex;align-items:center;background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:7px 14px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:border-color 0.15s,color 0.15s;}
+.btn-import:hover{border-color:var(--orange);color:var(--orange);}
+
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">SH</div>
+    <div>
+      <div class="logo-text">ABS Ofensores</div>
+      <div class="logo-sub">Shopee Logistics · Controle de Ausências 2026</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span class="badge-live" id="badge-semanas">SEMANAS 14–16</span>
+    <label class="btn-import" title="Importar novo CSV">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="vertical-align:middle;margin-right:6px;"><path d="M8 1v9M4 6l4 4 4-4M2 12h12v2H2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Importar CSV
+      <input type="file" id="csv-input" accept=".csv" style="display:none;" onchange="loadCSV(this)">
+    </label>
+    <div id="import-status" style="font-size:11px;color:var(--green);display:none;"></div>
+    <div id="storage-indicator" style="display:none;align-items:center;gap:8px;background:#1A2A1A;border:1px solid rgba(22,163,74,0.25);border-radius:8px;padding:6px 12px;">
+      <span style="width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 2s infinite;"></span>
+      <span id="storage-text" style="font-size:11px;color:#4ADE80;"></span>
+      <button onclick="clearStorage()" title="Limpar dados salvos" style="background:none;border:none;color:#555;cursor:pointer;font-size:13px;padding:0 0 0 6px;line-height:1;">✕</button>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}</style>
+
+<div class="wrap">
+
+  <div class="filters">
+    <div class="filter-group">
+      <span class="filter-label">Semana</span>
+      <select id="sel-semana" onchange="render()">
+        <option value="">Todas</option>
+        <option value="14">Semana 14</option>
+        <option value="15">Semana 15</option>
+        <option value="16">Semana 16</option>
+      </select>
+    </div>
+    <div class="filter-separator"></div>
+    <div class="filter-group">
+      <span class="filter-label">Coordenador</span>
+      <select id="sel-coord" onchange="render()">
+        <option value="">Todos</option>
+        <option value="ALISSON GUTEMBERG DOS SANTOS">Alisson</option>
+        <option value="KARLA CERAVOLO">Karla</option>
+        <option value="INVENTÁRIO">Inventário</option>
+        <option value="STERFFERSON NELIO FELIPE CABRAL">Sterfferson</option>
+      </select>
+    </div>
+    <div class="filter-separator"></div>
+    <div class="filter-group">
+      <span class="filter-label">Status</span>
+      <select id="sel-status" onchange="render()">
+        <option value="">Todos</option>
+        <option value="abandon">Abandono</option>
+        <option value="desligado">Desligados</option>
+        <option value="sem_entrevista">Sem Entrevista</option>
+      </select>
+    </div>
+    <button class="btn-reset" onclick="resetFilters()">Limpar filtros</button>
+  </div>
+
+  <div id="alert-box" class="abandon-alert" style="display:none;">
+    <span class="alert-icon">⚠</span>
+    <div class="alert-text"><strong id="alert-count">0</strong> colaborador(es) em processo de abandono de emprego identificados no período filtrado.</div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi orange">
+      <div class="kpi-label">Total Ocorrências</div>
+      <div class="kpi-value" id="kpi-total">—</div>
+      <div class="kpi-sub" id="kpi-total-sub">registros no período</div>
+    </div>
+    <div class="kpi red">
+      <div class="kpi-label">Total Dias ABS</div>
+      <div class="kpi-value" id="kpi-dias">—</div>
+      <div class="kpi-sub" id="kpi-dias-sub">dias perdidos</div>
+    </div>
+    <div class="kpi amber">
+      <div class="kpi-label">Colaboradores</div>
+      <div class="kpi-value" id="kpi-colab">—</div>
+      <div class="kpi-sub">colaboradores únicos</div>
+    </div>
+    <div class="kpi purple">
+      <div class="kpi-label">Sem Entrevista</div>
+      <div class="kpi-value" id="kpi-entrevista">—</div>
+      <div class="kpi-sub">pendentes de entrevista</div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-label">Abandono</div>
+      <div class="kpi-value" id="kpi-abandon">—</div>
+      <div class="kpi-sub">em processo</div>
+    </div>
+  </div>
+
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-title">Ocorrências por Semana</div>
+      <div class="chart-sub">Total de registros e dias por semana</div>
+      <div class="chart-wrap">
+        <canvas id="chartSemana" role="img" aria-label="Gráfico de barras: ocorrências e dias por semana"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Por Coordenador</div>
+      <div class="chart-sub">Distribuição de ocorrências</div>
+      <div class="chart-wrap" style="height:200px;">
+        <canvas id="chartCoord" role="img" aria-label="Gráfico de rosca por coordenador"></canvas>
+      </div>
+      <div class="coord-legend" id="coord-legend"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Top CIDs / Motivos</div>
+      <div class="chart-sub">Causas mais frequentes</div>
+      <div class="chart-wrap">
+        <canvas id="chartCid" role="img" aria-label="Gráfico de barras horizontais dos principais CIDs"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <div>
+      <div class="section-title">Ranking de Ofensores</div>
+      <div class="section-sub">Colaboradores com maiores índices de ausência</div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <input class="search-box" id="search-input" placeholder="Buscar colaborador..." oninput="render()">
+      <div class="sort-controls">
+        <button class="sort-btn" id="sb-dias" onclick="setSortBy('dias')">↓ Por dias</button>
+        <button class="sort-btn" id="sb-ocorr" onclick="setSortBy('ocorr')">↓ Por ocorr.</button>
+        <button class="sort-btn" id="sb-nome" onclick="setSortBy('nome')">A-Z Nome</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:32px;">#</th>
+          <th>Colaborador</th>
+          <th>Coordenador</th>
+          <th>Semanas</th>
+          <th>Ocorr.</th>
+          <th>Total Dias</th>
+          <th>Entrevista</th>
+          <th>Status</th>
+          <th>Principal CID</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+    <div class="pagination" id="pagination"></div>
+  </div>
+
+</div>
+
+<script>
+const RAW=[
+["FLAUDINE DOS SANTOS CASADO","15/01/2026",1,"02/04/2026","AGNALDO MIGUEL DE JESUS","ALISSON GUTEMBERG DOS SANTOS","","SPX","","Sem marcação no ponto","",14],
+["JEFFERSON GONCALVES DE BARROS SANTOS","02/06/2025",3,"01/04/2026","AGNALDO MIGUEL DE JESUS","ALISSON GUTEMBERG DOS SANTOS","","SPX","H10","Conjuntivite","",14],
+["MARCIO ALVES DE SOUZA RUFINO","16/09/2025",1,"01/04/2026","AGNALDO MIGUEL DE JESUS","ALISSON GUTEMBERG DOS SANTOS","","SPX","","Sem marcação no ponto","",14],
+["BETANIA MARIA DA SILVA","16/09/2025",1,"04/04/2026","BRUNO CELESTINO DE CASTRO SILVA","ALISSON GUTEMBERG DOS SANTOS","","SPX","","Sem marcação no ponto","",14],
+["GEOVÂNIA ALESSANDRA SILVA COSTA","16/09/2025",1,"01/04/2026","BRUNO CELESTINO DE CASTRO SILVA","ALISSON GUTEMBERG DOS SANTOS","","SPX","","Sem marcação no ponto","",14],
+["VIVIANE BERNARDINO MATOS DE LIMA ARAUJO","11/11/2025",6,"01/04/2026","BRUNO CELESTINO DE CASTRO SILVA","ALISSON GUTEMBERG DOS SANTOS","","SPX","CID-10","","",14],
+["ADRIANA MARIA DOS SANTOS","14/10/2025",3,"01/04/2026","CAUE FELIPE DE ALBUQUERQUE MELO","KARLA CERAVOLO","","SPX","","","",14],
+["JONH LUCAS PEREIRA DE OLIVEIRA","16/09/2025",7,"30/03/2026","CAUE FELIPE DE ALBUQUERQUE MELO","KARLA CERAVOLO","","SPX","","","",14],
+["MARIANA GOMES DO NASCIMENTO","14/10/2025",1,"31/03/2026","CAUE FELIPE DE ALBUQUERQUE MELO","KARLA CERAVOLO","","SPX","","","",14],
+["MARIANA GOMES DO NASCIMENTO","14/10/2025",3,"02/04/2026","CAUE FELIPE DE ALBUQUERQUE MELO","KARLA CERAVOLO","","SPX","","","",14],
+["LEANDRO DA SILVA SANTOS","11/11/2025",1,"02/04/2026","EVEANNE AMABIA SANTOS DE LIMA","KARLA CERAVOLO","","SPX","K409","Hérnia inguinal","",14],
+["LEANDRO DA SILVA SANTOS","11/11/2025",4,"03/04/2026","EVEANNE AMABIA SANTOS DE LIMA","KARLA CERAVOLO","","SPX","CID10","","",14],
+["LEANDRO DA SILVA SANTOS","11/11/2025",1,"03/04/2026","EVEANNE AMABIA SANTOS DE LIMA","KARLA CERAVOLO","","SPX","CID10","","",14],
+["WELTON GUSTAVO DA SILVA","16/09/2025",1,"04/04/2026","GUIOBERTO ARRUDA DE OLIVEIRA FILHO","KARLA CERAVOLO","","SPX","","","",14],
+["BARBARA LAIS MARQUES FERREIRA","10/02/2026",3,"30/03/2026","IRACEMA BATISTA DO NASCIMENTO BEZERRA","ALISSON GUTEMBERG DOS SANTOS","","SPX","T784","Alergia não especificada","",14],
+["BARBARA LAIS MARQUES FERREIRA","10/02/2026",1,"02/04/2026","IRACEMA BATISTA DO NASCIMENTO BEZERRA","ALISSON GUTEMBERG DOS SANTOS","","SPX","A09","Diarreia e gastroenterite","",14],
+["BARBARA LAIS MARQUES FERREIRA","10/02/2026",1,"04/04/2026","IRACEMA BATISTA DO NASCIMENTO BEZERRA","ALISSON GUTEMBERG DOS SANTOS","","SPX","","","",14],
+["ROSINEIDE ALVES FERREIRA","09/12/2025",1,"04/04/2026","IRACEMA BATISTA DO NASCIMENTO BEZERRA","ALISSON GUTEMBERG DOS SANTOS","","SPX","M545","Dor lombar baixa","",14],
+["GILVANIA MARIA DE MENEZES","16/09/2025",1,"31/03/2026","JERFFREY GONCALVES DE BARROS SANTOS","KARLA CERAVOLO","","SPX","G43","Enxaqueca","",14],
+["MARCOS FILIPE BRAZ DO MONTE","09/12/2025",2,"04/04/2026","JERFFREY GONCALVES DE BARROS SANTOS","KARLA CERAVOLO","","SPX","","","",14],
+["CAROLINNE RANYERY SOARES DOS SANTOS","11/11/2025",4,"03/04/2026","PEDRO AURELIO DE SOUZA BARBOSA","INVENTÁRIO","","SPX","60.0","Pneumoconiose","",14],
+["JANAINA LETICIA LIRA DE MENDONCA","11/11/2025",7,"30/03/2026","ROGERIO CUNHA DA SILVA","KARLA CERAVOLO","","SPX","","","",14],
+["GILSON VIEIRA DA SILVA","15/01/2026",1,"31/03/2026","ADONAI MAGALHÃES","INVENTÁRIO","","SPX","","","",14],
+["DAVYD WALLACE MENDES DOS SANTOS","16/09/2025",1,"04/04/2026","SIDCLEY ALEXANDRE DOS SANTOS","KARLA CERAVOLO","","SPX","","","",14],
+["WILKA FAUSTINO DA SILVA","11/11/2025",6,"30/03/2026","SILVIO AURELIO NASCIMENTO DE ARAUJO","ALISSON GUTEMBERG DOS SANTOS","","SPX","M766/M544/M543","Tendinite do calcâneo","",14],
+["ELIANDRO FELIPE DA SILVA","12/02/2026",1,"31/03/2026","BRUNO CELESTINO DE CASTRO SILVA","KARLA CERAVOLO","","BPO","","","",14],
+["CLEONIO ALVES DOS SANTOS JUNIOR","15/01/2026",2,"29/03/2026","VALDECIO FELIX DE LIMA","INVENTÁRIO","","SPX","","","",14],
+["CLEONIO ALVES DOS SANTOS JUNIOR","15/01/2026",1,"01/04/2026","VALDECIO FELIX DE LIMA","INVENTÁRIO","","SPX","","","",14],
+["LUCIO LUAN ANTONIO GOMES","16/09/2025",1,"01/04/2026","VALDECIO FELIX DE LIMA","INVENTÁRIO","","SPX","","","",14],
+["THIAGO DA SILVA BRAGA","14/10/2025",3,"30/03/2026","VALDECIO FELIX DE LIMA","INVENTÁRIO","","SPX","A09","Diarreia e gastroenterite","",14],
+["ALINE ANDRECIA DE FRANCA COSTA","09/12/2025",2,"06/04/2026","AGNALDO MIGUEL DE JESUS","ALISSON GUTEMBERG DOS SANTOS","SIM","SPX","","","",15],
+["EDSON ROBERIO MONTENEGRO","10/02/2026",3,"11/04/2026","AGNALDO MIGUEL DE JESUS","ALISSON GUTEMBERG DOS SANTOS","","SPX","M255","Dor articular","Desligado",15],
+["FLAUDINE DOS SANTOS CASADO","15/01/2026",2,"09/04/2026","AGNALDO MIGUEL DE JESUS","ALISSON GUTEMBERG DOS SANTOS","","SPX","SEM MARCAÇÃO","","Folga",15],
+["RODRIGO MARCELO ESTEVAO DA SILVA","15/01/2026",1,"05/04/2026","AGNALDO MIGUEL DE JESUS","ALISSON GUTEMBERG DOS SANTOS","","SPX","","Sem marcação no ponto","Folga",15],
+["RODRIGO MARCELO ESTEVAO DA SILVA","15/01/2026",2,"05/04/2026","AGNALDO MIGUEL DE JESUS","ALISSON GUTEMBERG DOS SANTOS","SIM","SPX","A09","Diarreia e gastroenterite","",15],
+["LUCIANO GOMES DE OLIVEIRA","11/11/2025",1,"10/04/2026","ANDERSON JOSE DA SILVA FREITAS","KARLA CERAVOLO","","SPX","","","",15],
+["LUCIANO GOMES DE OLIVEIRA","11/11/2025",5,"11/04/2026","ANDERSON JOSE DA SILVA FREITAS","KARLA CERAVOLO","","SPX","","","",15],
+["LUCIANO GOMES DE OLIVEIRA","11/11/2025",1,"09/04/2026","ANDERSON JOSE DA SILVA FREITAS","KARLA CERAVOLO","","SPX","SEM MARCAÇÃO","","",15],
+["ANGELICA AMARA DE OLIVEIRA","09/12/2025",2,"05/04/2026","BRUNO CELESTINO DE CASTRO SILVA","ALISSON GUTEMBERG DOS SANTOS","","SPX","A09","Diarreia e gastroenterite","Desligado",15],
+["ANGELICA AMARA DE OLIVEIRA","09/12/2025",2,"05/04/2026","BRUNO CELESTINO DE CASTRO SILVA","ALISSON GUTEMBERG DOS SANTOS","","SPX","A09","Diarreia e gastroenterite","Ajuste",15],
+["LENILSON HENRIQUE DA SILVA","16/09/2025",1,"11/04/2026","BRUNO CELESTINO DE CASTRO SILVA","ALISSON GUTEMBERG DOS SANTOS","","SPX","SEM MARCAÇÃO","","Ajuste",15],
+["MARCIO ALVES DE SOUZA RUFINO","16/09/2025",2,"09/04/2026","BRUNO CELESTINO DE CASTRO SILVA","ALISSON GUTEMBERG DOS SANTOS","","SPX","SEM MARCAÇÃO","","",15],
+["THALYSON DAVI GOMES BRAGA","20/08/2024",1,"05/04/2026","BRUNO CELESTINO DE CASTRO SILVA","ALISSON GUTEMBERG DOS SANTOS","","SPX","","Sem marcação no ponto","",15],
+["VIVIANE BERNARDINO MATOS DE LIMA ARAUJO","11/11/2025",5,"06/04/2026","BRUNO CELESTINO DE CASTRO SILVA","ALISSON GUTEMBERG DOS SANTOS","","SPX","10542","","Desligado",15],
+["ADRIANA MARIA DOS SANTOS","14/10/2025",2,"09/04/2026","CAUE FELIPE DE ALBUQUERQUE MELO","KARLA CERAVOLO","","SPX","","","",15],
+["JONH LUCAS PEREIRA DE OLIVEIRA","16/09/2025",7,"06/04/2026","CAUE FELIPE DE ALBUQUERQUE MELO","KARLA CERAVOLO","","SPX","FALTAS CONSECUTIVAS ( EM PROCESSO DE ABANDONO)","Abandono","",15],
+["LEANDRO DA SILVA SANTOS","11/11/2025",3,"09/04/2026","EVEANNE AMABIA SANTOS DE LIMA","KARLA CERAVOLO","","SPX","M77.3+M54.5","Esporão + dor lombar","",15],
+["LEONARDO ALVES DE ATAIDE","04/08/2025",1,"11/04/2026","GUILHERME SILVA CRUZ","STERFFERSON NELIO FELIPE CABRAL","","SPX","SEM MARCAÇÃO","","Folga",15],
+["ALINE DA SILVA PESSOA ANDRADE","12/08/2025",2,"10/04/2026","IRACEMA BATISTA DO NASCIMENTO BEZERRA","ALISSON GUTEMBERG DOS SANTOS","","SPX","A92","Febre viral","",15],
+["EDSON ROBERIO MONTENEGRO","10/02/2026",1,"05/04/2026","IRACEMA BATISTA DO NASCIMENTO BEZERRA","ALISSON GUTEMBERG DOS SANTOS","","SPX","","Sem marcação no ponto","Desligado",15],
+["CHARLISON ROBERTO CALHEIROS DA SILVA","12/08/2025",5,"08/04/2026","ISABEL SANDRA DA NOBREGA ARAUJO","STERFFERSON NELIO FELIPE CABRAL","","SPX","B349","Infecção viral não especificada","",15],
+["JESSICA RAIANE ALVES DA SILVA","14/10/2025",1,"05/04/2026","PEDRO AURELIO DE SOUZA BARBOSA","INVENTÁRIO","","SPX","","","Folga",15],
+["JANAINA LETICIA LIRA DE MENDONCA","11/11/2025",7,"06/04/2026","ROGERIO CUNHA DA SILVA","KARLA CERAVOLO","","SPX","FALTAS CONSECUTIVAS ( EM PROCESSO DE ABANDONO)","Abandono","Desligado",15],
+["LUANA CARLA DE BRITO SILVA","14/10/2025",1,"09/04/2026","ROGERIO CUNHA DA SILVA","KARLA CERAVOLO","","SPX","SEM MARCAÇÃO","","",15],
+["JANAINA DA COSTA ALVES","09/12/2025",1,"05/04/2026","ROGERIO SILVESTRE DA CONCEICAO JUNIOR","KARLA CERAVOLO","","SPX","","","",15],
+["EDIPO DOMINGOS DA SILVA","14/10/2025",1,"05/04/2026","SILVIO AURELIO NASCIMENTO DE ARAUJO","ALISSON GUTEMBERG DOS SANTOS","","SPX","","Sem marcação no ponto","",15],
+["EDIPO DOMINGOS DA SILVA","14/10/2025",2,"11/04/2026","SILVIO AURELIO NASCIMENTO DE ARAUJO","ALISSON GUTEMBERG DOS SANTOS","","SPX","A09","Diarreia e gastroenterite","",15],
+["WILKA FAUSTINO DA SILVA","11/11/2025",2,"08/04/2026","SILVIO AURELIO NASCIMENTO DE ARAUJO","ALISSON GUTEMBERG DOS SANTOS","","SPX","M545","Dor lombar","Desligado",15],
+["WILMA AVILA DE MENDONCA","10/02/2026",1,"08/04/2026","WANDERSON ALVES DE ALMEIDA","KARLA CERAVOLO","","SPX","M79.6+M545","Dor nos membros + dor lombar","",15],
+["LUCIANO GOMES DE OLIVEIRA","11/11/2025",4,"11/04/2026","ANDERSON JOSE DA SILVA FREITAS","KARLA CERAVOLO","SIM","SPX","","Atestado Médico","",15],
+["ADRIANA MARIA DOS SANTOS","14/10/2025",3,"13/04/2026","CAUE FELIPE DE ALBUQUERQUE MELO","KARLA CERAVOLO","","SPX","","Atestado Médico","",16],
+["LUCIANO GOMES DE OLIVEIRA","11/11/2025",4,"17/04/2026","ANDERSON JOSE DA SILVA FREITAS","KARLA CERAVOLO","SIM","SPX","","Atestado Médico","",16],
+["WILMA AVILA DE MENDONCA","10/02/2026",1,"16/04/2026","GUILHERME SILVA CRUZ","KARLA CERAVOLO","SIM","SPX","","Atestado Médico","",16],
+["JESSYCA CRISTINE MELO DA SILVA","11/11/2025",1,"12/04/2026","JONATHAN OLIVEIRA DE MENDONCA","KARLA CERAVOLO","","SPX","R51","Cefaleia","",16],
+["LEANDRO DA SILVA SANTOS","11/11/2025",3,"17/04/2026","EVEANNE AMABIA SANTOS DE LIMA","KARLA CERAVOLO","SIM","SPX","H10","Conjuntivite","",16],
+["LEANDRO DA SILVA SANTOS","11/11/2025",2,"14/04/2026","EVEANNE AMABIA SANTOS DE LIMA","KARLA CERAVOLO","SIM","SPX","A09","Diarreia e gastroenterite","",16],
+["MAYARA BARBOSA DE LIMA","10/02/2026",1,"17/04/2026","ISABEL SANDRA DA NOBREGA ARAUJO","STERFFERSON NELIO FELIPE CABRAL","","SPX","A09","Diarreia/gastroenterite","",16],
+["MAYARA BARBOSA DE LIMA","10/02/2026",2,"18/04/2026","ISABEL SANDRA DA NOBREGA ARAUJO","STERFFERSON NELIO FELIPE CABRAL","","SPX","A09","Diarreia/gastroenterite","",16],
+["ALMIR PEREIRA DE FIGUEIREDO","10/02/2026",1,"15/04/2026","IRACEMA BATISTA DO NASCIMENTO BEZERRA","ALISSON GUTEMBERG DOS SANTOS","SIM","SPX","M545","Dor lombar baixa","",16],
+["CAUE FELIPE DE ALBUQUERQUE MELO","07/07/2025",2,"16/04/2026","EVEANNE AMABIA SANTOS DE LIMA","KARLA CERAVOLO","","SPX","B34","Infecção viral","",16],
+["CHARLISON ROBERTO CALHEIROS DA SILVA","12/08/2025",4,"14/04/2026","ISABEL SANDRA DA NOBREGA ARAUJO","STERFFERSON NELIO FELIPE CABRAL","","SPX","B349","Infecção viral não especificada","",16],
+["MICHELE MARIA DA SILVA","16/09/2025",1,"16/04/2026","IRACEMA BATISTA DO NASCIMENTO BEZERRA","ALISSON GUTEMBERG DOS SANTOS","","SPX","J11","Influenza (gripe)","",16],
+["JESSICA RAIANE ALVES DA SILVA","14/10/2025",2,"16/04/2026","PEDRO AURELIO DE SOUZA BARBOSA","INVENTÁRIO","","SPX","M75","Lesões do ombro","",16],
+["SILVIO AURELIO NASCIMENTO DE ARAUJO","02/06/2025",1,"14/04/2026","IRACEMA BATISTA DO NASCIMENTO BEZERRA","ALISSON GUTEMBERG DOS SANTOS","","SPX","","Sem marcação","Ajuste",16],
+["ELIANE MARIA DA SILVA","14/10/2025",1,"16/04/2026","JONATHAN OLIVEIRA DE MENDONCA","KARLA CERAVOLO","","SPX","","Sem marcação","Ajuste",16],
+["JOAO VICTOR CORREIA DA SILVA","16/09/2025",1,"14/04/2026","RUAN DE SOUZA ANTUNES","INVENTÁRIO","","SPX","","Sem marcação","Ajuste",16],
+["ROGERIO CUNHA DA SILVA","14/07/2025",1,"18/04/2026","GUIOBERTO ARRUDA DE OLIVEIRA FILHO","KARLA CERAVOLO","","SPX","","Sem marcação","Ajuste",16],
+["CHARLISON ROBERTO CALHEIROS DA SILVA","12/08/2025",1,"19/04/2026","ISABEL SANDRA DA NOBREGA ARAUJO","STERFFERSON NELIO FELIPE CABRAL","","SPX","","Sem marcação","Ajuste",16],
+["ITALO GUSTAVO TAVARES","16/09/2025",1,"19/04/2026","JONATHAN OLIVEIRA DE MENDONCA","KARLA CERAVOLO","","SPX","","Atestado Médico","",16],
+["LOIDE PAULA SILVA DOS SANTOS","11/11/2025",1,"19/04/2026","AGNALDO MIGUEL DE JESUS","ALISSON GUTEMBERG DOS SANTOS","","SPX","","Sem marcação","Ajuste",16],
+["LUCIO LUAN ANTONIO GOMES","16/09/2025",1,"19/04/2026","VALDECIO FELIX DE LIMA","INVENTÁRIO","","SPX","","Sem marcação","Ajuste",16],
+["MARY JANE CAETANO DA SILVA","10/02/2026",1,"19/04/2026","GUILHERME SILVA CRUZ","STERFFERSON NELIO FELIPE CABRAL","","SPX","","Sem marcação","Ajuste",16],
+["JAMERSON ANDRADE DA SILVA","16/09/2025",3,"14/04/2026","PEDRO AURELIO DE SOUZA BARBOSA","INVENTÁRIO","","SPX","","Sem marcação","Ajuste",16],
+["MARCIO ALVES DE SOUZA RUFINO","16/09/2025",1,"17/04/2026","AGNALDO MIGUEL DE JESUS","ALISSON GUTEMBERG DOS SANTOS","","SPX","","Sem marcação","Ajuste",16],
+["SANDRA DE LIMA GOMES","16/09/2025",1,"12/04/2026","ROGERIO SILVESTRE DA CONCEICAO JUNIOR","KARLA CERAVOLO","","SPX","SEM MARCAÇÃO","Sem marcação","Ajuste",16]
+];
+
+const FIELDS={NOME:0,ADM:1,DIAS:2,DATA:3,GESTOR:4,COORD:5,ENTREVISTA:6,CONTRATO:7,CID:8,MOTIVO:9,OBS:10,SEMANA:11};
+
+const COORD_COLORS={
+  "ALISSON GUTEMBERG DOS SANTOS":"#EE4D2D",
+  "KARLA CERAVOLO":"#F59E0B",
+  "INVENTÁRIO":"#3B82F6",
+  "STERFFERSON NELIO FELIPE CABRAL":"#8B5CF6"
+};
+const COORD_SHORT={
+  "ALISSON GUTEMBERG DOS SANTOS":"Alisson",
+  "KARLA CERAVOLO":"Karla",
+  "INVENTÁRIO":"Inventário",
+  "STERFFERSON NELIO FELIPE CABRAL":"Sterfferson"
+};
+
+let chartSemana=null,chartCoord=null,chartCid=null;
+let currentPage=1;const PAGE_SIZE=15;
+let sortBy='dias';
+
+function setSortBy(v){sortBy=v;['dias','ocorr','nome'].forEach(x=>{document.getElementById('sb-'+x).classList.toggle('active',x===v);});render();}
+
+function resetFilters(){document.getElementById('sel-semana').value='';document.getElementById('sel-coord').value='';document.getElementById('sel-status').value='';document.getElementById('search-input').value='';currentPage=1;render();}
+
+function getFiltered(){
+  const sem=document.getElementById('sel-semana').value;
+  const coord=document.getElementById('sel-coord').value;
+  const status=document.getElementById('sel-status').value;
+  return RAW.filter(r=>{
+    if(sem && String(r[FIELDS.SEMANA])!==sem)return false;
+    if(coord && r[FIELDS.COORD]!==coord)return false;
+    if(status==='abandon'&&!isAbandon(r))return false;
+    if(status==='desligado'&&r[FIELDS.OBS]!=='Desligado')return false;
+    if(status==='sem_entrevista'&&r[FIELDS.ENTREVISTA]==='SIM')return false;
+    return true;
+  });
+}
+
+function isAbandon(r){return r[FIELDS.CID].includes('ABANDONO')||r[FIELDS.MOTIVO].includes('Abandono');}
+
+function groupByNome(data){
+  const map={};
+  data.forEach(r=>{
+    const n=r[FIELDS.NOME];
+    if(!map[n])map[n]={nome:n,coord:r[FIELDS.COORD],gestor:r[FIELDS.GESTOR],dias:0,ocorr:0,semanas:new Set(),entrevistas:[],cids:[],statuses:[],abandon:false,desligado:false};
+    map[n].dias+=r[FIELDS.DIAS];
+    map[n].ocorr++;
+    map[n].semanas.add(r[FIELDS.SEMANA]);
+    map[n].entrevistas.push(r[FIELDS.ENTREVISTA]);
+    if(r[FIELDS.CID]&&!r[FIELDS.CID].includes('MARCAÇÃO')&&!r[FIELDS.CID].includes('CID')&&!r[FIELDS.CID].includes('ABANDONO'))map[n].cids.push(r[FIELDS.CID]);
+    if(isAbandon(r))map[n].abandon=true;
+    if(r[FIELDS.OBS]==='Desligado')map[n].desligado=true;
+    map[n].statuses.push(r[FIELDS.OBS]);
+  });
+  return Object.values(map);
+}
+
+function render(){
+  const filtered=getFiltered();
+  const search=document.getElementById('search-input').value.toLowerCase();
+  const grouped=groupByNome(filtered);
+
+  const totalDias=filtered.reduce((s,r)=>s+r[FIELDS.DIAS],0);
+  const totalColab=new Set(filtered.map(r=>r[FIELDS.NOME])).size;
+  const semEntrevista=grouped.filter(g=>!g.entrevistas.some(e=>e==='SIM')).length;
+  const abandons=grouped.filter(g=>g.abandon);
+
+  document.getElementById('kpi-total').textContent=filtered.length;
+  document.getElementById('kpi-dias').textContent=totalDias;
+  document.getElementById('kpi-colab').textContent=totalColab;
+  document.getElementById('kpi-entrevista').textContent=semEntrevista;
+  document.getElementById('kpi-abandon').textContent=abandons.length;
+
+  const alertBox=document.getElementById('alert-box');
+  if(abandons.length>0){alertBox.style.display='flex';document.getElementById('alert-count').textContent=abandons.length+' ('+abandons.map(a=>a.nome.split(' ')[0]).join(', ')+')';}
+  else alertBox.style.display='none';
+
+  updateCharts(filtered);
+
+  let display=grouped.filter(g=>!search||g.nome.toLowerCase().includes(search));
+  if(sortBy==='dias')display.sort((a,b)=>b.dias-a.dias);
+  else if(sortBy==='ocorr')display.sort((a,b)=>b.ocorr-a.ocorr);
+  else display.sort((a,b)=>a.nome.localeCompare(b.nome));
+
+  const maxDias=display[0]?display[0].dias||1:1;
+  const total=display.length;
+  const pages=Math.ceil(total/PAGE_SIZE);
+  if(currentPage>pages)currentPage=1;
+  const slice=display.slice((currentPage-1)*PAGE_SIZE,currentPage*PAGE_SIZE);
+
+  const tbody=document.getElementById('table-body');
+  if(slice.length===0){tbody.innerHTML='<tr><td colspan="9" class="no-data">Nenhum registro encontrado.</td></tr>';return;}
+
+  tbody.innerHTML=slice.map((g,i)=>{
+    const rank=(currentPage-1)*PAGE_SIZE+i+1;
+    const hasEntrevista=g.entrevistas.some(e=>e==='SIM');
+    const semsArr=Array.from(g.semanas).sort();
+    const semBadges=semsArr.map(s=>`<span class="week-badge w${s}">S${s}</span>`).join('');
+    const pct=Math.min(100,Math.round(g.dias/maxDias*100));
+    const isHigh=g.dias>=7;
+    const topCid=g.cids[0]||'—';
+    let statusPill='';
+    if(g.abandon)statusPill=`<span class="status-pill pill-abandon">Abandono</span>`;
+    else if(g.desligado)statusPill=`<span class="status-pill pill-desligado">Desligado</span>`;
+    else statusPill=`<span class="status-pill pill-none">—</span>`;
+    const coordShort=COORD_SHORT[g.coord]||g.coord;
+    return `<tr>
+      <td style="color:var(--muted);font-size:12px;font-weight:600;">${rank}</td>
+      <td>
+        <div class="name-cell" title="${g.nome}">${g.nome}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">${g.gestor.split(' ')[0]} ${g.gestor.split(' ')[1]||''}</div>
+      </td>
+      <td><span style="font-size:12px;color:${COORD_COLORS[g.coord]||'var(--muted)'};">${coordShort}</span></td>
+      <td>${semBadges}</td>
+      <td style="font-size:13px;font-weight:600;color:var(--muted);">${g.ocorr}</td>
+      <td>
+        <div class="dias-bar">
+          <span class="dias-num" style="color:${isHigh?'var(--red)':'var(--orange)'};">${g.dias}</span>
+          <div class="bar-track"><div class="bar-fill${isHigh?' high':''}" style="width:${pct}%"></div></div>
+        </div>
+      </td>
+      <td><span class="entrevista-dot ${hasEntrevista?'dot-ok':'dot-no'}"></span><span style="font-size:12px;color:${hasEntrevista?'var(--green)':'var(--red)'};">${hasEntrevista?'Sim':'Não'}</span></td>
+      <td>${statusPill}</td>
+      <td><span class="cid-tag" title="${topCid}">${topCid.length>12?topCid.substring(0,12)+'…':topCid}</span></td>
+    </tr>`;
+  }).join('');
+
+  const pag=document.getElementById('pagination');
+  if(pages<=1){pag.innerHTML='';return;}
+  let btns=`<span class="page-info">${total} colaboradores</span>`;
+  for(let p=1;p<=pages;p++){btns+=`<button class="page-btn${p===currentPage?' active':''}" onclick="goPage(${p})">${p}</button>`;}
+  pag.innerHTML=btns;
+}
+
+function goPage(p){currentPage=p;render();}
+
+function updateCharts(data){
+  const semCount={14:0,15:0,16:0};
+  const semDias={14:0,15:0,16:0};
+  const coordCount={};
+  const cidCount={};
+  data.forEach(r=>{
+    const s=r[FIELDS.SEMANA];
+    if(semCount[s]!==undefined){semCount[s]++;semDias[s]+=r[FIELDS.DIAS];}
+    const c=r[FIELDS.COORD]||'Outros';
+    coordCount[c]=(coordCount[c]||0)+1;
+    let cid=r[FIELDS.MOTIVO]||r[FIELDS.CID]||'';
+    if(cid&&!cid.includes('MARCAÇÃO')&&!cid.includes('CID')&&!cid.includes('ABANDONO')&&!cid.includes('SEM')&&cid.length>2){
+      const short=cid.length>25?cid.substring(0,25)+'…':cid;
+      cidCount[short]=(cidCount[short]||0)+1;
+    } else if(!cid||cid.includes('MARCAÇÃO')||cid.includes('SEM')){
+      cidCount['Sem marcação no ponto']=(cidCount['Sem marcação no ponto']||0)+1;
+    }
+  });
+
+  if(chartSemana)chartSemana.destroy();
+  chartSemana=new Chart(document.getElementById('chartSemana'),{
+    type:'bar',
+    data:{
+      labels:['Sem 14','Sem 15','Sem 16'],
+      datasets:[
+        {label:'Ocorrências',data:[semCount[14],semCount[15],semCount[16]],backgroundColor:'#EE4D2D',borderRadius:5,borderSkipped:false},
+        {label:'Dias ABS',data:[semDias[14],semDias[15],semDias[16]],backgroundColor:'rgba(238,77,45,0.25)',borderRadius:5,borderSkipped:false}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#888',font:{family:'Outfit',size:11}}},
+        y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#888',font:{family:'Outfit',size:11}},beginAtZero:true}
+      }
+    }
+  });
+
+  const coordLabels=Object.keys(coordCount);
+  const coordVals=Object.values(coordCount);
+  const coordColors=coordLabels.map(l=>COORD_COLORS[l]||'#555');
+  if(chartCoord)chartCoord.destroy();
+  chartCoord=new Chart(document.getElementById('chartCoord'),{
+    type:'doughnut',
+    data:{labels:coordLabels,datasets:[{data:coordVals,backgroundColor:coordColors,borderWidth:0,hoverOffset:4}]},
+    options:{
+      responsive:true,maintainAspectRatio:false,cutout:'70%',
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${COORD_SHORT[ctx.label]||ctx.label}: ${ctx.parsed}`}}}
+    }
+  });
+  const legend=document.getElementById('coord-legend');
+  legend.innerHTML=coordLabels.map((l,i)=>`<span class="coord-item"><span class="coord-dot" style="background:${coordColors[i]};"></span>${COORD_SHORT[l]||l}: ${coordVals[i]}</span>`).join('');
+
+  const cidSorted=Object.entries(cidCount).sort((a,b)=>b[1]-a[1]).slice(0,7);
+  const cidLabels=cidSorted.map(x=>x[0]);
+  const cidVals=cidSorted.map(x=>x[1]);
+  const wrapH=Math.max(200,cidLabels.length*32+60);
+  document.querySelector('.chart-wrap:last-of-type').style.height=wrapH+'px';
+  if(chartCid)chartCid.destroy();
+  chartCid=new Chart(document.getElementById('chartCid'),{
+    type:'bar',
+    data:{
+      labels:cidLabels,
+      datasets:[{data:cidVals,backgroundColor:'rgba(59,130,246,0.7)',borderRadius:4,borderSkipped:false}]
+    },
+    options:{
+      indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#888',font:{family:'Outfit',size:10}},beginAtZero:true},
+        y:{grid:{display:false},ticks:{color:'#aaa',font:{family:'Outfit',size:10}}}
+      }
+    }
+  });
+}
+
+function loadCSV(input){
+  const file=input.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const text=e.target.result;
+      const lines=text.split(/\r?\n/).filter(l=>l.trim()&&l.split(';')[0].trim());
+      if(lines.length<2){alert('CSV vazio ou formato inválido.');return;}
+      const parsed=[];
+      const header=lines[0].split(';');
+      // Expected: NOME COMPLETO;ADMISSÃO;QTDADE DIAS DO ATESTADO;DATA INICIO ATESTADO;GESTOR IMEDIATO;COORDENADOR;ENTREVISTA;CONTRATO;CID;MOTIVO CID;Obs;Semana
+      for(let i=1;i<lines.length;i++){
+        const cols=lines[i].split(';');
+        if(!cols[0]||!cols[0].trim())continue;
+        const dias=parseInt(cols[2])||0;
+        const semana=parseInt(cols[11])||0;
+        if(!dias&&!semana)continue;
+        parsed.push([
+          cols[0].trim(),  // nome
+          cols[1]?cols[1].trim():'',  // admissao
+          dias,            // dias
+          cols[3]?cols[3].trim():'',  // data inicio
+          cols[4]?cols[4].trim():'',  // gestor
+          cols[5]?cols[5].trim():'',  // coord
+          cols[6]?cols[6].trim():'',  // entrevista
+          cols[7]?cols[7].trim():'SPX', // contrato
+          cols[8]?cols[8].trim():'',  // cid
+          cols[9]?cols[9].trim():'',  // motivo
+          cols[10]?cols[10].trim():'', // obs
+          semana           // semana
+        ]);
+      }
+      if(parsed.length===0){alert('Nenhum registro válido encontrado no CSV.');return;}
+      RAW.length=0;
+      parsed.forEach(r=>RAW.push(r));
+      // Update week badge
+      const weeks=[...new Set(RAW.map(r=>r[11]).filter(Boolean))].sort();
+      document.getElementById('badge-semanas').textContent='SEMANAS '+weeks.join(', ');
+      // Rebuild week filter options
+      const sel=document.getElementById('sel-semana');
+      while(sel.options.length>1)sel.remove(1);
+      weeks.forEach(w=>{const o=new Option('Semana '+w,w);sel.add(o);});
+      currentPage=1;
+      saveToStorage();
+      resetFilters();
+      const status=document.getElementById('import-status');
+      status.textContent=`✓ ${parsed.length} registros importados e salvos`;
+      status.style.display='block';
+      setTimeout(()=>status.style.display='none',3500);
+    }catch(err){alert('Erro ao processar CSV: '+err.message);}
+  };
+  reader.readAsText(file,'Windows-1252');
+}
+
+const STORAGE_KEY='shopee_abs_data';
+const STORAGE_META='shopee_abs_meta';
+
+function saveToStorage(){
+  try{
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(RAW));
+    const weeks=[...new Set(RAW.map(r=>r[11]).filter(Boolean))].sort();
+    localStorage.setItem(STORAGE_META,JSON.stringify({weeks,savedAt:new Date().toISOString(),count:RAW.length}));
+    updateStorageIndicator();
+  }catch(e){console.warn('Erro ao salvar:',e);}
+}
+
+function loadFromStorage(){
+  try{
+    const saved=localStorage.getItem(STORAGE_KEY);
+    const meta=localStorage.getItem(STORAGE_META);
+    if(!saved)return false;
+    const parsed=JSON.parse(saved);
+    if(!parsed||!parsed.length)return false;
+    RAW.length=0;
+    parsed.forEach(r=>RAW.push(r));
+    if(meta){
+      const m=JSON.parse(meta);
+      const weeks=m.weeks||[...new Set(RAW.map(r=>r[11]).filter(Boolean))].sort();
+      document.getElementById('badge-semanas').textContent='SEMANAS '+weeks.join(', ');
+      const sel=document.getElementById('sel-semana');
+      while(sel.options.length>1)sel.remove(1);
+      weeks.forEach(w=>{const o=new Option('Semana '+w,w);sel.add(o);});
+    }
+    return true;
+  }catch(e){return false;}
+}
+
+function clearStorage(){
+  if(!confirm('Apagar dados salvos e voltar para a base original?'))return;
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(STORAGE_META);
+  location.reload();
+}
+
+function updateStorageIndicator(){
+  try{
+    const meta=localStorage.getItem(STORAGE_META);
+    const ind=document.getElementById('storage-indicator');
+    if(!meta){ind.style.display='none';return;}
+    const m=JSON.parse(meta);
+    const dt=new Date(m.savedAt);
+    const fmt=dt.toLocaleDateString('pt-BR')+' '+dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    ind.style.display='flex';
+    document.getElementById('storage-text').textContent=`Salvo automaticamente · ${m.count} registros · ${fmt}`;
+  }catch(e){}
+}
+
+const hadSaved=loadFromStorage();
+updateStorageIndicator();
+render();
+if(hadSaved){
+  const status=document.getElementById('import-status');
+  const meta=localStorage.getItem(STORAGE_META);
+  if(meta){const m=JSON.parse(meta);status.textContent=`↺ ${m.count} registros restaurados do armazenamento local`;status.style.display='block';setTimeout(()=>status.style.display='none',3500);}
+}
+</script>
+</body>
+</html>
