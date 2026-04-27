@@ -110,7 +110,30 @@ tbody td{padding:11px 14px;font-size:13px;vertical-align:middle;}
 .sort-btn.active{background:var(--orange-dim);border-color:var(--orange);color:var(--orange);}
 .btn-import{display:inline-flex;align-items:center;background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:7px 14px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:border-color 0.15s,color 0.15s;}
 .btn-import:hover{border-color:var(--orange);color:var(--orange);}
-
+.ms-wrap{position:relative;}
+.ms-btn{display:flex;align-items:center;gap:8px;background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-family:'Outfit',sans-serif;font-size:13px;cursor:pointer;white-space:nowrap;transition:border-color 0.15s;}
+.ms-btn:hover,.ms-btn.open{border-color:var(--orange);}
+.ms-btn.has-selection{border-color:var(--orange);background:var(--orange-dim);color:var(--orange);}
+.ms-label{font-weight:500;}
+.ms-count{background:var(--orange);color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;font-weight:700;}
+.ms-arrow{color:var(--muted);transition:transform 0.15s;flex-shrink:0;}
+.ms-btn.open .ms-arrow,.ms-btn.has-selection.open .ms-arrow{transform:rotate(180deg);}
+.ms-dropdown{display:none;position:absolute;top:calc(100% + 6px);left:0;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:6px;min-width:175px;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,0.4);}
+.ms-dropdown.open{display:block;}
+.ms-item{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--text);transition:background 0.1s;user-select:none;}
+.ms-item:hover{background:rgba(255,255,255,0.05);}
+.ms-item input[type=checkbox]{accent-color:var(--orange);width:15px;height:15px;cursor:pointer;flex-shrink:0;}
+.recorr-grid{display:flex;gap:4px;align-items:center;flex-wrap:nowrap;}
+.recorr-dot{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.recorr-dot span{font-size:9px;color:var(--muted2);font-weight:500;line-height:1;}
+.recorr-pip{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;}
+.recorr-pip.hit{background:var(--orange);border-color:var(--orange);color:#fff;}
+.recorr-pip.miss{background:transparent;border-color:var(--muted2);color:var(--muted2);}
+.recorr-badge{font-size:10px;font-weight:600;border-radius:4px;padding:2px 6px;margin-left:4px;white-space:nowrap;}
+.recorr-badge.alto{background:rgba(255,75,75,0.15);color:var(--red);border:1px solid rgba(255,75,75,0.3);}
+.recorr-badge.medio{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,158,11,0.3);}
+.recorr-badge.baixo{background:var(--green-dim);color:var(--green);border:1px solid rgba(22,163,74,0.3);}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(3,1fr);}.charts-row{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
@@ -124,7 +147,7 @@ tbody td{padding:11px 14px;font-size:13px;vertical-align:middle;}
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:10px;">
-    <span class="badge-live" id="badge-semanas">SEMANAS 14–16</span>
+    <span class="badge-live" id="badge-semanas">SEMANAS 14–17</span>
     <label class="btn-import" title="Importar novo CSV">
       <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="vertical-align:middle;margin-right:6px;"><path d="M8 1v9M4 6l4 4 4-4M2 12h12v2H2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       Importar CSV
@@ -143,36 +166,62 @@ tbody td{padding:11px 14px;font-size:13px;vertical-align:middle;}
 <div class="wrap">
 
   <div class="filters">
-    <div class="filter-group">
-      <span class="filter-label">Semana</span>
-      <select id="sel-semana" onchange="render()">
-        <option value="">Todas</option>
-        <option value="14">Semana 14</option>
-        <option value="15">Semana 15</option>
-        <option value="16">Semana 16</option>
-      </select>
+    <div class="ms-wrap" id="ms-semana">
+      <button class="ms-btn" onclick="toggleDropdown('semana')">
+        <span class="ms-label">Semana</span>
+        <span class="ms-count" id="ms-count-semana" style="display:none"></span>
+        <svg class="ms-arrow" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
+      </button>
+      <div class="ms-dropdown" id="ms-dd-semana">
+        <label class="ms-item"><input type="checkbox" value="14" onchange="onFilterChange()"><span>Semana 14</span></label>
+        <label class="ms-item"><input type="checkbox" value="15" onchange="onFilterChange()"><span>Semana 15</span></label>
+        <label class="ms-item"><input type="checkbox" value="16" onchange="onFilterChange()"><span>Semana 16</span></label>
+        <label class="ms-item"><input type="checkbox" value="17" onchange="onFilterChange()"><span>Semana 17</span></label>
+      </div>
     </div>
-    <div class="filter-separator"></div>
-    <div class="filter-group">
-      <span class="filter-label">Coordenador</span>
-      <select id="sel-coord" onchange="render()">
-        <option value="">Todos</option>
-        <option value="ALISSON GUTEMBERG DOS SANTOS">Alisson</option>
-        <option value="KARLA CERAVOLO">Karla</option>
-        <option value="INVENTÁRIO">Inventário</option>
-        <option value="STERFFERSON NELIO FELIPE CABRAL">Sterfferson</option>
-      </select>
+
+    <div class="ms-wrap" id="ms-coord">
+      <button class="ms-btn" onclick="toggleDropdown('coord')">
+        <span class="ms-label">Coordenador</span>
+        <span class="ms-count" id="ms-count-coord" style="display:none"></span>
+        <svg class="ms-arrow" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
+      </button>
+      <div class="ms-dropdown" id="ms-dd-coord">
+        <label class="ms-item"><input type="checkbox" value="ALISSON" onchange="onFilterChange()"><span>Alisson</span></label>
+        <label class="ms-item"><input type="checkbox" value="KARLA" onchange="onFilterChange()"><span>Karla</span></label>
+        <label class="ms-item"><input type="checkbox" value="INVENTÁRIO" onchange="onFilterChange()"><span>Inventário</span></label>
+        <label class="ms-item"><input type="checkbox" value="STERFFERSON" onchange="onFilterChange()"><span>Sterfferson</span></label>
+        <label class="ms-item"><input type="checkbox" value="RICARDO" onchange="onFilterChange()"><span>Ricardo</span></label>
+      </div>
     </div>
-    <div class="filter-separator"></div>
-    <div class="filter-group">
-      <span class="filter-label">Status</span>
-      <select id="sel-status" onchange="render()">
-        <option value="">Todos</option>
-        <option value="abandon">Abandono</option>
-        <option value="desligado">Desligados</option>
-        <option value="sem_entrevista">Sem Entrevista</option>
-      </select>
+
+    <div class="ms-wrap" id="ms-status">
+      <button class="ms-btn" onclick="toggleDropdown('status')">
+        <span class="ms-label">Status</span>
+        <span class="ms-count" id="ms-count-status" style="display:none"></span>
+        <svg class="ms-arrow" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
+      </button>
+      <div class="ms-dropdown" id="ms-dd-status">
+        <label class="ms-item"><input type="checkbox" value="abandon" onchange="onFilterChange()"><span>Abandono</span></label>
+        <label class="ms-item"><input type="checkbox" value="desligado" onchange="onFilterChange()"><span>Desligado</span></label>
+        <label class="ms-item"><input type="checkbox" value="sem_entrevista" onchange="onFilterChange()"><span>Sem Entrevista</span></label>
+      </div>
     </div>
+
+    <div class="ms-wrap" id="ms-obs">
+      <button class="ms-btn" onclick="toggleDropdown('obs')">
+        <span class="ms-label">OBS</span>
+        <span class="ms-count" id="ms-count-obs" style="display:none"></span>
+        <svg class="ms-arrow" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
+      </button>
+      <div class="ms-dropdown" id="ms-dd-obs">
+        <label class="ms-item"><input type="checkbox" value="Ajuste" onchange="onFilterChange()"><span>Ajuste</span></label>
+        <label class="ms-item"><input type="checkbox" value="Desligado" onchange="onFilterChange()"><span>Desligado</span></label>
+        <label class="ms-item"><input type="checkbox" value="Folga" onchange="onFilterChange()"><span>Folga</span></label>
+        <label class="ms-item"><input type="checkbox" value="sem_obs" onchange="onFilterChange()"><span>Sem OBS</span></label>
+      </div>
+    </div>
+
     <button class="btn-reset" onclick="resetFilters()">Limpar filtros</button>
   </div>
 
@@ -259,6 +308,7 @@ tbody td{padding:11px 14px;font-size:13px;vertical-align:middle;}
           <th>Semanas</th>
           <th>Ocorr.</th>
           <th>Total Dias</th>
+          <th>Recorrência</th>
           <th>Entrevista</th>
           <th>Status</th>
           <th>Principal CID</th>
@@ -357,22 +407,56 @@ const RAW=[
 ["MARY JANE CAETANO DA SILVA","10/02/2026",1,"19/04/2026","GUILHERME SILVA CRUZ","STERFFERSON NELIO FELIPE CABRAL","","SPX","","Sem marcação","Ajuste",16],
 ["JAMERSON ANDRADE DA SILVA","16/09/2025",3,"14/04/2026","PEDRO AURELIO DE SOUZA BARBOSA","INVENTÁRIO","","SPX","","Sem marcação","Ajuste",16],
 ["MARCIO ALVES DE SOUZA RUFINO","16/09/2025",1,"17/04/2026","AGNALDO MIGUEL DE JESUS","ALISSON GUTEMBERG DOS SANTOS","","SPX","","Sem marcação","Ajuste",16],
-["SANDRA DE LIMA GOMES","16/09/2025",1,"12/04/2026","ROGERIO SILVESTRE DA CONCEICAO JUNIOR","KARLA CERAVOLO","","SPX","SEM MARCAÇÃO","Sem marcação","Ajuste",16]
+["SANDRA DE LIMA GOMES","16/09/2025",1,"12/04/2026","ROGERIO SILVESTRE DA CONCEICAO JUNIOR","KARLA CERAVOLO","","SPX","SEM MARCAÇÃO","Sem marcação","Ajuste",16],
+["AMANDA BEATRIZ NERY DA SILVA","10/02/2026",1,"20/04/2026","BRUNO CELESTINO DE CASTRO SILVA","ALISSON GUTEMBERG DOS SANTOS","N/A","SPX","SEM MARCAÇÃO NO PONTO","","Ajuste",17],
+["ANA CLARA NUNES DE LIMA PEREIRA","09/12/2025",1,"22/04/2026","ISABEL SANDRA DA NOBREGA ARAUJO","STERFFERSON NELIO FELIPE CABRAL","NÃO","SPX","SEM CID","","",17],
+["ANA DILZA DE JESUS GOMES","09/12/2025",2,"25/04/2026","AGNALDO MIGUEL DE JESUS","ALISSON GUTEMBERG DOS SANTOS","NÃO","SPX","J039","Amigdalite aguda não especificada","",17],
+["ARIANE WALESKA DE OLIVEIRA LIMA","09/12/2025",1,"23/04/2026","ANDERSON JOSE DA SILVA FREITAS","KARLA CERAVOLO (T3)","NÃO","SPX","K30","Dispepsia","",17],
+["ARICLES JOSE DA SILVA","07/04/2026",1,"26/04/2026","BRUNO CELESTINO DE CASTRO SILVA","KARLA CERAVOLO (T3)","NÃO","BPO","R11","Náusea e vômito","",17],
+["ARTHUR RICARDO DA SILVA","15/01/2026",1,"24/04/2026","JERFFREY GONCALVES DE BARROS SANTOS","KARLA CERAVOLO (T3)","N/A","SPX","SEM MARCAÇÃO NO PONTO","","Ajuste",17],
+["CAUE FELIPE DE ALBUQUERQUE MELO","07/07/2025",1,"22/04/2026","EVEANNE AMABIA SANTOS DE LIMA","KARLA CERAVOLO (T1)","SIM","SPX","R51","Cefaleia (dor de cabeça)","",17],
+["CRISTIENE CIBELE DA SILVA COSTA","16/09/2025",1,"24/04/2026","ROGERIO SILVESTRE DA CONCEICAO JUNIOR","KARLA CERAVOLO (T1)","N/A","SPX","SEM MARCAÇÃO NO PONTO","","Ajuste",17],
+["DAIANA JANUARIA DA SILVA","09/12/2025",3,"25/04/2026","JONATHAN OLIVEIRA DE MENDONCA","KARLA CERAVOLO (T1)","NÃO","SPX","SEM CID","","",17],
+["ELIANDRO FELIPE DA SILVA","12/02/2026",2,"25/04/2026","BRUNO CELESTINO DE CASTRO SILVA","KARLA CERAVOLO (T3)","NÃO","BPO","J00","Nasofaringite aguda (resfriado)","",17],
+["ELLEN RAYANE AMORIM DA SILVA","14/10/2025",1,"23/04/2026","CAUE FELIPE DE ALBUQUERQUE MELO","KARLA CERAVOLO (T1)","NÃO","SPX","SEM CID","","",17],
+["GILVANIA MARIA DE MENEZES","16/09/2025",1,"25/04/2026","JERFFREY GONCALVES DE BARROS SANTOS","KARLA CERAVOLO (T3)","N/A","SPX","SEM MARCAÇÃO NO PONTO","","Ajuste",17],
+["GRAZIELE SOLANGE DOS SANTOS","11/11/2025",1,"22/04/2026","ROGERIO SILVESTRE DA CONCEICAO JUNIOR","KARLA CERAVOLO (T1)","NÃO","SPX","R42","Tontura e instabilidade","",17],
+["GRAZIELE SOLANGE DOS SANTOS","11/11/2025",2,"25/04/2026","ROGERIO SILVESTRE DA CONCEICAO JUNIOR","KARLA CERAVOLO (T1)","NÃO","SPX","R51","Cefaleia (dor de cabeça)","",17],
+["JAMERSON ANDRADE DA SILVA","16/09/2025",2,"24/04/2026","PEDRO AURELIO DE SOUZA BARBOSA","RICARDO RODRIGUES VIEIRA DE ABREU","N/A","SPX","SEM MARCAÇÃO NO PONTO","","Ajuste",17],
+["JANAINA DA COSTA ALVES","09/12/2025",1,"25/04/2026","ROGERIO SILVESTRE DA CONCEICAO JUNIOR","KARLA CERAVOLO (T1)","N/A","SPX","SEM MARCAÇÃO NO PONTO","","Ajuste",17],
+["JERFFREY GONCALVES DE BARROS SANTOS","02/06/2025",1,"22/04/2026","BRUNO CELESTINO DE CASTRO SILVA","KARLA CERAVOLO (T3)","N/A","SPX","SEM MARCAÇÃO NO PONTO","","Ajuste",17],
+["JESSICA CRISTINA DA SILVA","07/04/2026",1,"26/04/2026","BRUNO CELESTINO DE CASTRO SILVA","KARLA CERAVOLO (T3)","NÃO","BPO","M796","Dor em membro","",17],
+["LUCIANO GOMES DE OLIVEIRA","11/11/2025",1,"17/04/2026","ANDERSON JOSE DA SILVA FREITAS","KARLA CERAVOLO (T3)","NÃO","SPX","SEM CID","","",17],
+["LUCIANO GOMES DE OLIVEIRA","11/11/2025",3,"24/04/2026","ANDERSON JOSE DA SILVA FREITAS","KARLA CERAVOLO (T3)","N/A","SPX","SEM MARCAÇÃO NO PONTO","","Ajuste",17],
+["LUCIO LUAN ANTONIO GOMES","16/09/2025",1,"23/04/2026","VALDECIO FELIX DE LIMA","RICARDO RODRIGUES VIEIRA DE ABREU","N/A","SPX","SEM MARCAÇÃO NO PONTO","","Ajuste",17],
+["MARIA EDUARDA DA SILVA","14/10/2025",2,"25/04/2026","BRUNO CELESTINO DE CASTRO SILVA","ALISSON GUTEMBERG DOS SANTOS","NÃO","SPX","M545","Dor lombar baixa","",17],
+["QUEZIA LAIS VIEIRA GOMES","16/09/2025",1,"25/04/2026","ANDERSON JOSE DA SILVA FREITAS","KARLA CERAVOLO (T3)","N/A","SPX","SEM MARCAÇÃO NO PONTO","","Ajuste",17],
+["ROGERIO SILVESTRE DA CONCEICAO JUNIOR","02/06/2025",2,"23/04/2026","ELIAS COSTA DOS SANTOS JUNIOR","KARLA CERAVOLO (T1)","N/A","SPX","SEM MARCAÇÃO NO PONTO","","",17],
+["SANDRA DE LIMA GOMES","16/09/2025",1,"26/04/2026","ROGERIO SILVESTRE DA CONCEICAO JUNIOR","KARLA CERAVOLO (T1)","N/A","SPX","SEM MARCAÇÃO NO PONTO","","Ajuste",17],
+["TALIS GABRIEL OLIVEIRA DA SILVA","10/02/2026",2,"25/04/2026","BRUNO CELESTINO DE CASTRO SILVA","ALISSON GUTEMBERG DOS SANTOS","NÃO","SPX","L089","Infecção local da pele","",17],
+["WEMESSON JOSE DOS SANTOS","04/08/2025",1,"25/04/2026","ISABEL SANDRA DA NOBREGA ARAUJO","STERFFERSON NELIO FELIPE CABRAL","N/A","SPX","SEM MARCAÇÃO NO PONTO","","Ajuste",17],
+["WILMA AVILA DE MENDONCA","10/02/2026",2,"25/04/2026","GUILHERME SILVA CRUZ","KARLA CERAVOLO (T3)","NÃO","SPX","M54","Dorsalgia (dor nas costas)","",17]
 ];
 
 const FIELDS={NOME:0,ADM:1,DIAS:2,DATA:3,GESTOR:4,COORD:5,ENTREVISTA:6,CONTRATO:7,CID:8,MOTIVO:9,OBS:10,SEMANA:11};
 
-const COORD_COLORS={
-  "ALISSON GUTEMBERG DOS SANTOS":"#EE4D2D",
-  "KARLA CERAVOLO":"#F59E0B",
-  "INVENTÁRIO":"#3B82F6",
-  "STERFFERSON NELIO FELIPE CABRAL":"#8B5CF6"
-};
 const COORD_SHORT={
   "ALISSON GUTEMBERG DOS SANTOS":"Alisson",
   "KARLA CERAVOLO":"Karla",
+  "KARLA CERAVOLO (T1)":"Karla T1",
+  "KARLA CERAVOLO (T3)":"Karla T3",
   "INVENTÁRIO":"Inventário",
-  "STERFFERSON NELIO FELIPE CABRAL":"Sterfferson"
+  "STERFFERSON NELIO FELIPE CABRAL":"Sterfferson",
+  "RICARDO RODRIGUES VIEIRA DE ABREU":"Ricardo"
+};
+const COORD_COLORS={
+  "ALISSON GUTEMBERG DOS SANTOS":"#EE4D2D",
+  "KARLA CERAVOLO":"#F59E0B",
+  "KARLA CERAVOLO (T1)":"#F59E0B",
+  "KARLA CERAVOLO (T3)":"#FBBF24",
+  "INVENTÁRIO":"#3B82F6",
+  "STERFFERSON NELIO FELIPE CABRAL":"#8B5CF6",
+  "RICARDO RODRIGUES VIEIRA DE ABREU":"#10B981"
 };
 
 let chartSemana=null,chartCoord=null,chartCid=null;
@@ -381,18 +465,76 @@ let sortBy='dias';
 
 function setSortBy(v){sortBy=v;['dias','ocorr','nome'].forEach(x=>{document.getElementById('sb-'+x).classList.toggle('active',x===v);});render();}
 
-function resetFilters(){document.getElementById('sel-semana').value='';document.getElementById('sel-coord').value='';document.getElementById('sel-status').value='';document.getElementById('search-input').value='';currentPage=1;render();}
+function getChecked(id){return [...document.querySelectorAll(`#ms-dd-${id} input:checked`)].map(x=>x.value);}
+
+function toggleDropdown(id){
+  const dd=document.getElementById('ms-dd-'+id);
+  const btn=document.querySelector(`#ms-${id} .ms-btn`);
+  const isOpen=dd.classList.contains('open');
+  // close all
+  document.querySelectorAll('.ms-dropdown.open').forEach(el=>el.classList.remove('open'));
+  document.querySelectorAll('.ms-btn.open').forEach(el=>el.classList.remove('open'));
+  if(!isOpen){dd.classList.add('open');btn.classList.add('open');}
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.ms-wrap')){
+    document.querySelectorAll('.ms-dropdown.open').forEach(el=>el.classList.remove('open'));
+    document.querySelectorAll('.ms-btn.open').forEach(el=>el.classList.remove('open'));
+  }
+});
+
+function updateBadges(){
+  ['semana','coord','status','obs'].forEach(id=>{
+    const checked=getChecked(id);
+    const btn=document.querySelector(`#ms-${id} .ms-btn`);
+    const count=document.getElementById('ms-count-'+id);
+    if(checked.length>0){
+      btn.classList.add('has-selection');
+      count.textContent=checked.length;
+      count.style.display='inline';
+    } else {
+      btn.classList.remove('has-selection');
+      count.style.display='none';
+    }
+  });
+}
+
+function onFilterChange(){updateBadges();currentPage=1;render();}
+
+function resetFilters(){
+  document.querySelectorAll('.ms-dropdown input[type=checkbox]').forEach(cb=>cb.checked=false);
+  document.getElementById('search-input').value='';
+  updateBadges();
+  currentPage=1;
+  render();
+}
 
 function getFiltered(){
-  const sem=document.getElementById('sel-semana').value;
-  const coord=document.getElementById('sel-coord').value;
-  const status=document.getElementById('sel-status').value;
+  const sems=getChecked('semana');
+  const coords=getChecked('coord');
+  const statuses=getChecked('status');
+  const obs=getChecked('obs');
+  const search=document.getElementById('search-input').value.toLowerCase();
   return RAW.filter(r=>{
-    if(sem && String(r[FIELDS.SEMANA])!==sem)return false;
-    if(coord && r[FIELDS.COORD]!==coord)return false;
-    if(status==='abandon'&&!isAbandon(r))return false;
-    if(status==='desligado'&&r[FIELDS.OBS]!=='Desligado')return false;
-    if(status==='sem_entrevista'&&r[FIELDS.ENTREVISTA]==='SIM')return false;
+    if(sems.length && !sems.includes(String(r[FIELDS.SEMANA])))return false;
+    if(coords.length && !coords.some(c=>r[FIELDS.COORD].toUpperCase().includes(c.toUpperCase())))return false;
+    if(statuses.length){
+      const passStatus=statuses.some(s=>{
+        if(s==='abandon')return isAbandon(r);
+        if(s==='desligado')return r[FIELDS.OBS]==='Desligado';
+        if(s==='sem_entrevista')return r[FIELDS.ENTREVISTA]!=='SIM';
+        return false;
+      });
+      if(!passStatus)return false;
+    }
+    if(obs.length){
+      const passObs=obs.some(o=>{
+        if(o==='sem_obs')return !r[FIELDS.OBS];
+        return r[FIELDS.OBS]===o;
+      });
+      if(!passObs)return false;
+    }
+    if(search&&![r[FIELDS.NOME],r[FIELDS.GESTOR],r[FIELDS.COORD],r[FIELDS.MOTIVO]].join(' ').toLowerCase().includes(search))return false;
     return true;
   });
 }
@@ -450,7 +592,16 @@ function render(){
   const slice=display.slice((currentPage-1)*PAGE_SIZE,currentPage*PAGE_SIZE);
 
   const tbody=document.getElementById('table-body');
-  if(slice.length===0){tbody.innerHTML='<tr><td colspan="9" class="no-data">Nenhum registro encontrado.</td></tr>';return;}
+  if(slice.length===0){tbody.innerHTML='<tr><td colspan="10" class="no-data">Nenhum registro encontrado.</td></tr>';return;}
+
+  // Build full-RAW recurrence map (all weeks per person, regardless of filters)
+  const allWeeks=[...new Set(RAW.map(r=>r[FIELDS.SEMANA]).filter(Boolean))].sort((a,b)=>a-b);
+  const rawRecorr={};
+  RAW.forEach(r=>{
+    const n=r[FIELDS.NOME];
+    if(!rawRecorr[n])rawRecorr[n]=new Set();
+    rawRecorr[n].add(r[FIELDS.SEMANA]);
+  });
 
   tbody.innerHTML=slice.map((g,i)=>{
     const rank=(currentPage-1)*PAGE_SIZE+i+1;
@@ -465,6 +616,22 @@ function render(){
     else if(g.desligado)statusPill=`<span class="status-pill pill-desligado">Desligado</span>`;
     else statusPill=`<span class="status-pill pill-none">—</span>`;
     const coordShort=COORD_SHORT[g.coord]||g.coord;
+
+    // Recorrência: semanas com atestado no histórico completo
+    const personWeeks=rawRecorr[g.nome]||new Set();
+    const hitCount=allWeeks.filter(w=>personWeeks.has(w)).length;
+    const pips=allWeeks.map(w=>{
+      const hit=personWeeks.has(w);
+      return `<div class="recorr-dot">
+        <div class="recorr-pip ${hit?'hit':'miss'}">${hit?'✓':'·'}</div>
+        <span>S${w}</span>
+      </div>`;
+    }).join('');
+    let badgeClass='baixo', badgeLabel='1ª vez';
+    if(hitCount>=3){badgeClass='alto';badgeLabel='Reincidente';}
+    else if(hitCount===2){badgeClass='medio';badgeLabel='2ª vez';}
+    const recorrCell=`<div class="recorr-grid">${pips}<span class="recorr-badge ${badgeClass}">${badgeLabel}</span></div>`;
+
     return `<tr>
       <td style="color:var(--muted);font-size:12px;font-weight:600;">${rank}</td>
       <td>
@@ -480,6 +647,7 @@ function render(){
           <div class="bar-track"><div class="bar-fill${isHigh?' high':''}" style="width:${pct}%"></div></div>
         </div>
       </td>
+      <td>${recorrCell}</td>
       <td><span class="entrevista-dot ${hasEntrevista?'dot-ok':'dot-no'}"></span><span style="font-size:12px;color:${hasEntrevista?'var(--green)':'var(--red)'};">${hasEntrevista?'Sim':'Não'}</span></td>
       <td>${statusPill}</td>
       <td><span class="cid-tag" title="${topCid}">${topCid.length>12?topCid.substring(0,12)+'…':topCid}</span></td>
@@ -496,8 +664,10 @@ function render(){
 function goPage(p){currentPage=p;render();}
 
 function updateCharts(data){
-  const semCount={14:0,15:0,16:0};
-  const semDias={14:0,15:0,16:0};
+  // Build dynamic week list from all RAW data (not just filtered)
+  const allWeeks=[...new Set(RAW.map(r=>r[FIELDS.SEMANA]).filter(Boolean))].sort((a,b)=>a-b);
+  const semCount={},semDias={};
+  allWeeks.forEach(w=>{semCount[w]=0;semDias[w]=0;});
   const coordCount={};
   const cidCount={};
   data.forEach(r=>{
@@ -518,15 +688,15 @@ function updateCharts(data){
   chartSemana=new Chart(document.getElementById('chartSemana'),{
     type:'bar',
     data:{
-      labels:['Sem 14','Sem 15','Sem 16'],
+      labels:allWeeks.map(w=>'Sem '+w),
       datasets:[
-        {label:'Ocorrências',data:[semCount[14],semCount[15],semCount[16]],backgroundColor:'#EE4D2D',borderRadius:5,borderSkipped:false},
-        {label:'Dias ABS',data:[semDias[14],semDias[15],semDias[16]],backgroundColor:'rgba(238,77,45,0.25)',borderRadius:5,borderSkipped:false}
+        {label:'Ocorrências',data:allWeeks.map(w=>semCount[w]),backgroundColor:'#EE4D2D',borderRadius:5,borderSkipped:false},
+        {label:'Dias ABS',data:allWeeks.map(w=>semDias[w]),backgroundColor:'rgba(238,77,45,0.25)',borderRadius:5,borderSkipped:false}
       ]
     },
     options:{
       responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false}},
+      plugins:{legend:{labels:{color:'#888',font:{family:'Outfit',size:11},boxWidth:10}}},
       scales:{
         x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#888',font:{family:'Outfit',size:11}}},
         y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#888',font:{family:'Outfit',size:11}},beginAtZero:true}
@@ -609,12 +779,18 @@ function loadCSV(input){
       RAW.length=0;
       parsed.forEach(r=>RAW.push(r));
       // Update week badge
-      const weeks=[...new Set(RAW.map(r=>r[11]).filter(Boolean))].sort();
-      document.getElementById('badge-semanas').textContent='SEMANAS '+weeks.join(', ');
+      const weeks=[...new Set(RAW.map(r=>r[11]).filter(Boolean))].sort((a,b)=>a-b);
+      document.getElementById('badge-semanas').textContent='SEMANAS '+weeks[0]+'–'+weeks[weeks.length-1];
       // Rebuild week filter options
       const sel=document.getElementById('sel-semana');
       while(sel.options.length>1)sel.remove(1);
       weeks.forEach(w=>{const o=new Option('Semana '+w,w);sel.add(o);});
+      // Rebuild OBS filter options
+      const obsVals=[...new Set(RAW.map(r=>r[10]).filter(Boolean))].sort();
+      const selObs=document.getElementById('sel-obs');
+      while(selObs.options.length>1)selObs.remove(1);
+      obsVals.forEach(v=>{const o=new Option(v,v);selObs.add(o);});
+      selObs.add(new Option('Sem OBS','sem_obs'));
       currentPage=1;
       saveToStorage();
       resetFilters();
