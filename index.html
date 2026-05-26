@@ -162,37 +162,54 @@ tbody td{padding:11px 14px;font-size:13px;vertical-align:middle;}
 <!-- SETTINGS MODAL -->
 <div class="modal-bg" id="settings-modal" style="display:none;">
   <div class="modal-box">
-    <div class="modal-title">⚙️ Sincronização via GitHub</div>
-    <div class="modal-sub">Os dados ficam em um arquivo <code style="background:#333;padding:1px 5px;border-radius:3px;font-size:11px;">abs_data.json</code> no seu repositório. Leitura é pública — só quem faz upload precisa configurar o token.</div>
-    <div class="steps">
-      <ol>
-        <li>No GitHub, vá em <strong>Settings → Developer Settings → Personal access tokens → Tokens (classic)</strong></li>
-        <li>Clique <strong>Generate new token</strong>, marque apenas a permissão <code>repo</code> (ou <code>public_repo</code> se o repo for público)</li>
-        <li>Copie o token gerado (começa com <code>ghp_...</code>) — só aparece uma vez</li>
-        <li>Preencha os campos abaixo com os dados do seu repositório</li>
-      </ol>
+    <div class="modal-title">⚙️ Sincronização via GitHub Gist</div>
+    <div class="modal-sub">Os dados ficam em um Gist público. Quem faz upload configura o token uma vez. Quem só lê cola o Gist ID — sem precisar de conta.</div>
+
+    <div id="cfg-panel-admin" style="display:block;">
+      <div class="steps">
+        <ol>
+          <li>GitHub → <strong>Settings → Developer Settings → Personal access tokens → Tokens (classic)</strong></li>
+          <li>Clique <strong>Generate new token</strong> e marque <strong>somente</strong> o escopo <code>gist</code></li>
+          <li>Copie o token (<code>ghp_...</code>) e cole abaixo</li>
+          <li>Clique <strong>Criar Gist & Salvar</strong> — o Gist ID aparece para você compartilhar com a equipe</li>
+        </ol>
+      </div>
+      <div class="modal-field">
+        <label>Personal Access Token (escopo: gist)</label>
+        <input type="password" id="cfg-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+      </div>
+      <div id="cfg-gist-row" class="modal-field" style="display:none;">
+        <label>Gist ID (compartilhe com a equipe)</label>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="cfg-gistid" placeholder="Cole aqui se já tiver um Gist" style="flex:1;">
+          <button class="btn-secondary" onclick="copyGistId()" style="white-space:nowrap;">📋 Copiar</button>
+        </div>
+      </div>
     </div>
-    <div class="modal-field">
-      <label>Usuário GitHub</label>
-      <input type="text" id="cfg-user" placeholder="ex: r4ntu">
+
+    <div id="cfg-panel-reader" style="display:none;">
+      <div class="steps" style="border-color:var(--blue);">
+        <ol>
+          <li>Peça o <strong>Gist ID</strong> para quem faz os uploads</li>
+          <li>Cole abaixo — sem precisar de token</li>
+        </ol>
+      </div>
+      <div class="modal-field">
+        <label>Gist ID</label>
+        <input type="text" id="cfg-gistid-reader" placeholder="ex: a1b2c3d4e5f6...">
+      </div>
     </div>
-    <div class="modal-field">
-      <label>Nome do Repositório</label>
-      <input type="text" id="cfg-repo" placeholder="ex: Dash_Controle-de-ABS">
+
+    <div style="display:flex;gap:10px;margin-bottom:16px;">
+      <button class="btn-secondary" id="tab-admin" onclick="showCfgTab('admin')" style="border-color:var(--orange);color:var(--orange);">Quero fazer uploads</button>
+      <button class="btn-secondary" id="tab-reader" onclick="showCfgTab('reader')">Só quero visualizar</button>
     </div>
-    <div class="modal-field">
-      <label>Branch</label>
-      <input type="text" id="cfg-branch" placeholder="main">
-    </div>
-    <div class="modal-field">
-      <label>Personal Access Token (ghp_...)</label>
-      <input type="password" id="cfg-key" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
-    </div>
+
     <div id="modal-test-result" class="modal-test-result"></div>
     <div class="modal-actions">
-      <button class="btn-primary" onclick="testAndSaveConfig()">✓ Testar & Salvar</button>
+      <button class="btn-primary" id="cfg-save-btn" onclick="saveConfig()">✓ Salvar</button>
       <button class="btn-secondary" onclick="closeSettings()">Cancelar</button>
-      <button class="btn-secondary" style="margin-left:auto;color:var(--red);" onclick="clearCloudConfig()">Remover configuração</button>
+      <button class="btn-secondary" style="margin-left:auto;color:var(--red);" onclick="clearCloudConfig()">Remover</button>
     </div>
   </div>
 </div>
@@ -517,12 +534,12 @@ let chartSemana=null,chartCoord=null,chartCid=null,currentPage=1,sortBy='dias';
 const PAGE_SIZE=15;
 
 // ═══════════════════════════════════════════════════════════════
-// CLOUD SYNC — GitHub API
-// Leitura: raw.githubusercontent.com (público, sem token)
-// Escrita: api.github.com (requer PAT — só quem faz upload)
+// CLOUD SYNC — GitHub Gist
+// Escrita: PATCH api.github.com/gists/{id} — token escopo "gist"
+// Leitura: GET api.github.com/gists/{id}   — público, sem token
 // ═══════════════════════════════════════════════════════════════
-const LS_CFG='shopee_abs_gh_cfg';
-const DATA_FILE='abs_data.json';
+const LS_CFG='shopee_abs_gist_v2';
+const GIST_FILENAME='abs_data.json';
 
 function getCloudCfg(){try{return JSON.parse(localStorage.getItem(LS_CFG)||'null');}catch(e){return null;}}
 function setCloudCfg(cfg){localStorage.setItem(LS_CFG,JSON.stringify(cfg));}
@@ -538,42 +555,32 @@ function setSyncStatus(state,text){
   btn.style.display=(state==='ok'||state==='error')?'inline':'none';
 }
 
-function ghRawUrl(cfg){
-  return `https://raw.githubusercontent.com/${cfg.user}/${cfg.repo}/${cfg.branch||'main'}/${DATA_FILE}`;
-}
-function ghApiUrl(cfg){
-  return `https://api.github.com/repos/${cfg.user}/${cfg.repo}/contents/${DATA_FILE}`;
-}
-
 async function syncFromCloud(manual=false){
   const cfg=getCloudCfg();
-  if(!cfg){setSyncStatus('local','Somente local');return false;}
+  if(!cfg||!cfg.gistId){setSyncStatus('local','Configure ⚙️ Sync para compartilhar');return false;}
   setSyncStatus('syncing','Sincronizando…');
   try{
-    // Leitura via raw URL (sem auth, sem CORS issues)
-    const url=ghRawUrl(cfg)+'?t='+Date.now();
-    const r=await fetch(url);
-    if(!r.ok){
-      if(r.status===404){setSyncStatus('ok','Sem dados na nuvem ainda — importe um CSV');return false;}
-      throw new Error('HTTP '+r.status);
-    }
-    const data=await r.json();
-    if(data&&data.raw&&Array.isArray(data.raw)&&data.raw.length>0){
-      RAW.length=0;
-      data.raw.forEach(row=>RAW.push(row));
-      rebuildFiltersFromRAW();
-      render();
-      const dt=new Date(data.savedAt||Date.now());
-      const fmt=dt.toLocaleDateString('pt-BR')+' '+dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-      setSyncStatus('ok',`GitHub · ${data.raw.length} reg · ${fmt}`);
-      if(manual)showStatus(`↻ ${data.raw.length} registros carregados do GitHub`);
-      return true;
-    }
-    setSyncStatus('ok','Arquivo vazio — importe um CSV');
-    return false;
+    const headers={'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};
+    if(cfg.token)headers['Authorization']='Bearer '+cfg.token;
+    const r=await fetch(`https://api.github.com/gists/${cfg.gistId}`,{headers});
+    if(!r.ok)throw new Error('HTTP '+r.status+(r.status===404?' — Gist ID inválido':''));
+    const gist=await r.json();
+    const file=gist.files&&gist.files[GIST_FILENAME];
+    if(!file||!file.content)throw new Error('Arquivo não encontrado no Gist');
+    const data=JSON.parse(file.content);
+    if(!data||!data.raw||!data.raw.length){setSyncStatus('ok','Gist vazio — importe um CSV');return false;}
+    RAW.length=0;
+    data.raw.forEach(row=>RAW.push(row));
+    rebuildFiltersFromRAW();
+    render();
+    const dt=new Date(data.savedAt||Date.now());
+    const fmt=dt.toLocaleDateString('pt-BR')+' '+dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    setSyncStatus('ok',`Gist · ${data.raw.length} reg · ${fmt}`);
+    if(manual)showStatus(`↻ ${data.raw.length} registros carregados`);
+    return true;
   }catch(e){
-    setSyncStatus('error','Erro ao ler GitHub — ↻ para tentar novamente');
-    console.warn('GitHub sync error:',e);
+    setSyncStatus('error',e.message);
+    console.error('Gist sync error:',e.message);
     return false;
   }
 }
@@ -581,115 +588,122 @@ async function syncFromCloud(manual=false){
 async function saveToCloud(){
   const cfg=getCloudCfg();
   if(!cfg||!cfg.token){return false;}
-  setSyncStatus('syncing','Publicando no GitHub…');
+  setSyncStatus('syncing','Publicando no Gist…');
   try{
     const payload={raw:RAW,savedAt:new Date().toISOString(),count:RAW.length};
-    // Encode content to base64 (GitHub API requires base64)
-    const jsonStr=JSON.stringify(payload,null,2);
-    const bytes=new TextEncoder().encode(jsonStr);
-    const binStr=Array.from(bytes,b=>String.fromCharCode(b)).join('');
-    const content=btoa(binStr);
-
-    const apiUrl=ghApiUrl(cfg);
-    // GitHub now requires Bearer for PATs (ghp_...)
-    const headers={
-      'Authorization':'Bearer '+cfg.token,
-      'Content-Type':'application/json',
-      'Accept':'application/vnd.github+json',
-      'X-GitHub-Api-Version':'2022-11-28'
-    };
-
-    // Try to get current SHA (needed to UPDATE an existing file)
-    let sha='';
-    try{
-      const existing=await fetch(apiUrl,{headers});
-      if(existing.ok){
-        const d=await existing.json();
-        sha=d.sha||'';
+    const content=JSON.stringify(payload,null,2);
+    const headers={'Authorization':'Bearer '+cfg.token,'Content-Type':'application/json','Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};
+    let gistId=cfg.gistId;
+    let r;
+    if(gistId){
+      r=await fetch(`https://api.github.com/gists/${gistId}`,{method:'PATCH',headers,body:JSON.stringify({files:{[GIST_FILENAME]:{content}}})});
+    }else{
+      r=await fetch('https://api.github.com/gists',{method:'POST',headers,body:JSON.stringify({description:'ABS Ofensores — Shopee Logistics',public:true,files:{[GIST_FILENAME]:{content}}})});
+      if(r.ok){
+        const d=await r.json();
+        gistId=d.id;
+        setCloudCfg({...cfg,gistId});
+        document.getElementById('cfg-gistid').value=gistId;
+        document.getElementById('cfg-gistid-reader').value=gistId;
+        document.getElementById('cfg-gist-row').style.display='block';
+        showStatus('✓ Gist criado! Compartilhe o ID com a equipe via ⚙️ Sync');
       }
-    }catch(e){/* file doesn't exist yet, that's ok */}
-
-    const body={
-      message:`ABS data update — ${new Date().toLocaleDateString('pt-BR')}`,
-      content,
-      branch:cfg.branch||'main'
-    };
-    if(sha)body.sha=sha;
-
-    const r=await fetch(apiUrl,{method:'PUT',headers,body:JSON.stringify(body)});
+    }
     if(!r.ok){
-      const errData=await r.json().catch(()=>({}));
-      const msg=errData.message||'HTTP '+r.status;
-      // Diagnose common errors
-      if(r.status===401)throw new Error('Token inválido ou expirado — reconfigure em ⚙️ Sync');
-      if(r.status===403)throw new Error('Token sem permissão de escrita — precisa do escopo "repo" ou "public_repo"');
-      if(r.status===404)throw new Error('Repositório não encontrado — verifique usuário/repo em ⚙️ Sync');
-      if(r.status===422)throw new Error('Erro de validação: '+msg);
-      throw new Error(msg);
+      const err=await r.json().catch(()=>({}));
+      if(r.status===401)throw new Error('Token inválido — reconfigure em ⚙️ Sync');
+      if(r.status===403)throw new Error('Token sem escopo "gist" — gere um novo token');
+      if(r.status===404)throw new Error('Gist não encontrado — reconfigure em ⚙️ Sync');
+      throw new Error(err.message||'HTTP '+r.status);
     }
     const fmt=new Date().toLocaleDateString('pt-BR')+' '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-    setSyncStatus('ok',`GitHub · ${RAW.length} reg · ${fmt}`);
+    setSyncStatus('ok',`Gist · ${RAW.length} reg · ${fmt}`);
     return true;
   }catch(e){
     setSyncStatus('error',e.message);
-    console.error('GitHub save error:',e.message);
+    console.error('Gist save error:',e.message);
     return false;
   }
 }
 
 // ── Settings modal ──────────────────────────────────────────────
+let cfgTab='admin';
+function showCfgTab(tab){
+  cfgTab=tab;
+  document.getElementById('cfg-panel-admin').style.display=tab==='admin'?'block':'none';
+  document.getElementById('cfg-panel-reader').style.display=tab==='reader'?'block':'none';
+  document.getElementById('tab-admin').style.cssText=tab==='admin'?'border-color:var(--orange);color:var(--orange);':'background:transparent;';
+  document.getElementById('tab-reader').style.cssText=tab==='reader'?'border-color:var(--orange);color:var(--orange);':'background:transparent;';
+  document.getElementById('cfg-save-btn').textContent=tab==='admin'?'✓ Verificar & Salvar':'✓ Salvar ID';
+}
+
 function openSettings(){
   const cfg=getCloudCfg()||{};
-  document.getElementById('cfg-user').value=cfg.user||'';
-  document.getElementById('cfg-repo').value=cfg.repo||'';
-  document.getElementById('cfg-branch').value=cfg.branch||'main';
-  document.getElementById('cfg-key').value=cfg.token||'';
+  document.getElementById('cfg-token').value=cfg.token||'';
+  document.getElementById('cfg-gistid').value=cfg.gistId||'';
+  document.getElementById('cfg-gistid-reader').value=cfg.gistId||'';
+  document.getElementById('cfg-gist-row').style.display=cfg.gistId?'block':'none';
   document.getElementById('modal-test-result').style.display='none';
+  showCfgTab(cfg.token?'admin':'reader');
   document.getElementById('settings-modal').style.display='flex';
 }
 function closeSettings(){document.getElementById('settings-modal').style.display='none';}
 document.getElementById('settings-modal').addEventListener('click',e=>{if(e.target===document.getElementById('settings-modal'))closeSettings();});
 
-async function testAndSaveConfig(){
-  const user=document.getElementById('cfg-user').value.trim();
-  const repo=document.getElementById('cfg-repo').value.trim();
-  const branch=document.getElementById('cfg-branch').value.trim()||'main';
-  const token=document.getElementById('cfg-key').value.trim();
-  const res=document.getElementById('modal-test-result');
-  if(!user||!repo){res.textContent='Preencha usuário e repositório.';res.className='modal-test-result err';res.style.display='block';return;}
-  res.textContent='Testando conexão…';res.className='modal-test-result';res.style.display='block';
-  try{
-    const testUrl=`https://api.github.com/repos/${user}/${repo}`;
-    const headers={'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};
-    if(token)headers['Authorization']='Bearer '+token;
-    const r=await fetch(testUrl,{headers});
-    if(r.status===401)throw new Error('Token inválido — gere um novo em GitHub → Settings → Developer Settings');
-    if(r.status===403)throw new Error('Sem permissão — verifique os escopos do token');
-    if(r.status===404)throw new Error(`Repositório "${user}/${repo}" não encontrado`);
-    if(!r.ok)throw new Error('HTTP '+r.status);
-    const d=await r.json();
-    if(d.private&&!token)throw new Error('Repositório privado — token obrigatório');
-    // Verifica se o token tem permissão de escrita (tenta ler o próprio perfil)
-    if(token){
-      const me=await fetch('https://api.github.com/user',{headers});
-      if(!me.ok)throw new Error('Token sem permissão — verifique os escopos');
-    }
-    setCloudCfg({user,repo,branch,token});
-    res.textContent=`✓ Conectado a ${d.full_name} (${d.private?'privado':'público'})${token?' · token válido':''}`;
-    res.className='modal-test-result ok';
-    setTimeout(()=>{closeSettings();syncFromCloud();},1200);
-  }catch(e){
-    res.textContent='✗ '+e.message;res.className='modal-test-result err';
-  }
+function copyGistId(){
+  const id=document.getElementById('cfg-gistid').value;
+  if(!id)return;
+  navigator.clipboard.writeText(id).then(()=>showStatus('Gist ID copiado!'));
 }
 
+async function saveConfig(){
+  const res=document.getElementById('modal-test-result');
+  res.style.display='block';
+  if(cfgTab==='reader'){
+    const gistId=document.getElementById('cfg-gistid-reader').value.trim();
+    if(!gistId){res.textContent='Cole o Gist ID.';res.className='modal-test-result err';return;}
+    res.textContent='Verificando Gist…';res.className='modal-test-result';
+    try{
+      const r=await fetch(`https://api.github.com/gists/${gistId}`,{headers:{'Accept':'application/vnd.github+json'}});
+      if(!r.ok)throw new Error('Gist ID inválido (HTTP '+r.status+')');
+      const cfg=getCloudCfg()||{};
+      setCloudCfg({...cfg,gistId,token:cfg.token||''});
+      res.textContent='✓ Gist encontrado!';res.className='modal-test-result ok';
+      setTimeout(()=>{closeSettings();syncFromCloud();},900);
+    }catch(e){res.textContent='✗ '+e.message;res.className='modal-test-result err';}
+    return;
+  }
+  const token=document.getElementById('cfg-token').value.trim();
+  const existingGistId=document.getElementById('cfg-gistid').value.trim();
+  if(!token){res.textContent='Cole o Personal Access Token.';res.className='modal-test-result err';return;}
+  res.textContent='Verificando token…';res.className='modal-test-result';
+  try{
+    const headers={'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};
+    const me=await fetch('https://api.github.com/user',{headers});
+    if(me.status===401)throw new Error('Token inválido ou expirado');
+    if(!me.ok)throw new Error('Erro HTTP '+me.status);
+    const user=await me.json();
+    // Check gist scope by listing gists
+    const scopeCheck=await fetch('https://api.github.com/gists?per_page=1',{headers});
+    if(scopeCheck.status===403)throw new Error('Token sem escopo "gist" — selecione-o ao gerar o token');
+    setCloudCfg({token,gistId:existingGistId});
+    res.textContent=`✓ Token OK (${user.login}) — ${existingGistId?'Gist configurado. Clique Upload para sincronizar.':'Gist será criado no primeiro upload de CSV'}`; 
+    res.className='modal-test-result ok';
+    setTimeout(()=>{closeSettings();if(existingGistId)syncFromCloud();},1200);
+  }catch(e){res.textContent='✗ '+e.message;res.className='modal-test-result err';}
+}
+
+function testAndSaveConfig(){saveConfig();}
+
 function clearCloudConfig(){
-  if(!confirm('Remover configuração do GitHub?'))return;
+  if(!confirm('Remover configuração de sync?'))return;
   localStorage.removeItem(LS_CFG);
   setSyncStatus('local','Somente local');
   closeSettings();
 }
 
+function ghRawUrl(){return '';}
+function ghApiUrl(){return '';}
 // ── Filtros & UI ────────────────────────────────────────────────
 function rebuildFiltersFromRAW(){
   const weeks=[...new Set(RAW.map(r=>r[FIELDS.SEMANA]).filter(Boolean))].sort((a,b)=>a-b);
