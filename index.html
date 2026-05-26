@@ -541,7 +541,20 @@ const PAGE_SIZE=15;
 const LS_CFG='shopee_abs_gist_v2';
 const GIST_FILENAME='abs_data.json';
 
-function getCloudCfg(){try{return JSON.parse(localStorage.getItem(LS_CFG)||'null');}catch(e){return null;}}
+// ── Gist ID padrão (embed para todos os usuários lerem automaticamente)
+// Cole aqui o ID do seu Gist após o primeiro upload:
+// Ex: const DEFAULT_GIST_ID='a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4';
+const DEFAULT_GIST_ID='';
+
+function getCloudCfg(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(LS_CFG)||'null');
+    // Se tem config salva, usa ela; senão usa o DEFAULT_GIST_ID embutido
+    if(saved)return saved;
+    if(DEFAULT_GIST_ID)return{gistId:DEFAULT_GIST_ID,token:''};
+    return null;
+  }catch(e){return DEFAULT_GIST_ID?{gistId:DEFAULT_GIST_ID,token:''}:null;}
+}
 function setCloudCfg(cfg){localStorage.setItem(LS_CFG,JSON.stringify(cfg));}
 
 function setSyncStatus(state,text){
@@ -606,7 +619,11 @@ async function saveToCloud(){
         document.getElementById('cfg-gistid').value=gistId;
         document.getElementById('cfg-gistid-reader').value=gistId;
         document.getElementById('cfg-gist-row').style.display='block';
-        showStatus('✓ Gist criado! Compartilhe o ID com a equipe via ⚙️ Sync');
+        if(!DEFAULT_GIST_ID){
+          setTimeout(()=>{
+            alert(`✓ Gist criado com sucesso!\n\nGist ID: ${gistId}\n\nPara todos carregarem automaticamente ao abrir o link:\n1. Abra o arquivo HTML no editor\n2. Encontre: const DEFAULT_GIST_ID=''\n3. Substitua por: const DEFAULT_GIST_ID='${gistId}'\n4. Faça commit no GitHub\n\nApós isso, qualquer pessoa que abrir o link verá os dados atualizados automaticamente.`);
+          },500);
+        }
       }
     }
     if(!r.ok){
@@ -639,10 +656,11 @@ function showCfgTab(tab){
 
 function openSettings(){
   const cfg=getCloudCfg()||{};
+  const effectiveGistId=cfg.gistId||DEFAULT_GIST_ID||'';
   document.getElementById('cfg-token').value=cfg.token||'';
-  document.getElementById('cfg-gistid').value=cfg.gistId||'';
-  document.getElementById('cfg-gistid-reader').value=cfg.gistId||'';
-  document.getElementById('cfg-gist-row').style.display=cfg.gistId?'block':'none';
+  document.getElementById('cfg-gistid').value=effectiveGistId;
+  document.getElementById('cfg-gistid-reader').value=effectiveGistId;
+  document.getElementById('cfg-gist-row').style.display=effectiveGistId?'block':'none';
   document.getElementById('modal-test-result').style.display='none';
   showCfgTab(cfg.token?'admin':'reader');
   document.getElementById('settings-modal').style.display='flex';
@@ -687,9 +705,17 @@ async function saveConfig(){
     const scopeCheck=await fetch('https://api.github.com/gists?per_page=1',{headers});
     if(scopeCheck.status===403)throw new Error('Token sem escopo "gist" — selecione-o ao gerar o token');
     setCloudCfg({token,gistId:existingGistId});
-    res.textContent=`✓ Token OK (${user.login}) — ${existingGistId?'Gist configurado. Clique Upload para sincronizar.':'Gist será criado no primeiro upload de CSV'}`; 
+    res.textContent=`✓ Token OK (${user.login}) — ${existingGistId?'Gist configurado. Clique Upload para sincronizar.':'Gist será criado no primeiro upload de CSV'}`;
     res.className='modal-test-result ok';
-    setTimeout(()=>{closeSettings();if(existingGistId)syncFromCloud();},1200);
+    // Se tem gistId, mostra instruções para embutir no HTML
+    if(existingGistId&&!DEFAULT_GIST_ID){
+      res.innerHTML=`✓ Token OK (${user.login})<br><br>
+        <strong>Para todos carregarem automaticamente:</strong><br>
+        No arquivo HTML, substitua <code>const DEFAULT_GIST_ID=''</code> por:<br>
+        <code>const DEFAULT_GIST_ID='${existingGistId}'</code><br>
+        Depois faça commit do HTML atualizado no GitHub.`;
+    }
+    setTimeout(()=>{closeSettings();if(existingGistId)syncFromCloud();},existingGistId&&!DEFAULT_GIST_ID?8000:1200);
   }catch(e){res.textContent='✗ '+e.message;res.className='modal-test-result err';}
 }
 
@@ -897,18 +923,31 @@ function loadCSV(input){
 rebuildFiltersFromRAW();
 setSortBy('dias');
 
-// 1. Try cloud first; 2. fallback localStorage; 3. use hardcoded RAW
 (async()=>{
-  const cloudOk=await syncFromCloud();
-  if(!cloudOk){
-    try{
-      const local=localStorage.getItem('shopee_abs_local');
-      if(local){const d=JSON.parse(local);if(d&&d.length){RAW.length=0;d.forEach(r=>RAW.push(r));rebuildFiltersFromRAW();}}
-    }catch(e){}
-    if(!getCloudCfg())setSyncStatus('local','Somente local — configure ⚙️ Sync para compartilhar');
+  const cfg=getCloudCfg();
+  if(cfg&&cfg.gistId){
+    // Tem Gist configurado (embutido ou via ⚙️) — sincroniza na abertura
+    const cloudOk=await syncFromCloud();
+    if(!cloudOk)render();
+  }else{
+    // Sem Gist — mostra dados locais e orienta
+    setSyncStatus('local','Configure ⚙️ Sync para compartilhar dados');
+    render();
   }
-  render();
+
+  // Auto-refresh a cada 5 minutos — mantém dados atualizados sem recarregar
+  setInterval(async()=>{
+    const c=getCloudCfg();
+    if(c&&c.gistId)await syncFromCloud();
+  }, 5*60*1000);
 })();
+
+// Ao salvar um Gist ID pela primeira vez, atualiza o DEFAULT_GIST_ID visível
+// no modal para facilitar compartilhamento
+function getEffectiveGistId(){
+  const cfg=getCloudCfg();
+  return cfg&&cfg.gistId?cfg.gistId:DEFAULT_GIST_ID;
+}
 </script>
 </body>
 </html>
